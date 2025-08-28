@@ -17,6 +17,14 @@ public class Producto {
 		this.proveedores.add(proveedor);
 	}
 	
+	public int getStock() {
+	    return this.stock;
+	}
+	
+	public String nombre() {
+		return this.nombre;
+	}
+	
 	public void compra(String proveedor, int compra) {
 		if(!this.proveedores.contains(proveedor)) {
 			this.proveedores.add(proveedor);
