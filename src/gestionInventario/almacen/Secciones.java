@@ -1,5 +1,6 @@
 package gestionInventario.almacen;
 import java.util.HashMap;
+import java.util.Scanner;
 
 public class Secciones {
 	private String nombre;
@@ -13,16 +14,16 @@ public class Secciones {
 	public Secciones(String nombre, Producto producto) {
 		this.nombre=nombre;
 		this.productos= new HashMap<>();
-		productos.put(producto.nombre(),producto);
+		productos.put(producto.getNombre(),producto);
 	}
 	
-	public String nombre() {
+	public String getNombre() {
 		return this.nombre;
 	}
 	
 	public void agregarProducto(Producto producto) {
-		if(!productos.containsKey(producto.nombre())){
-			productos.put(producto.nombre(),producto);
+		if(!productos.containsKey(producto.getNombre())){
+			productos.put(producto.getNombre(),producto);
 		}
 		
 		else {
@@ -30,7 +31,8 @@ public class Secciones {
 		}
 	}
 	
-	public void CompraYventa(String nombreProducto, boolean compraOVenta, String proveedor, int cantidad) {
+	public void compraYVenta(String nombreProducto, boolean compraOVenta, String proveedor) {
+		Scanner sc= new Scanner(System.in);
 	    Producto producto = productos.get(nombreProducto);
 	    if (producto == null) {
 	        System.out.println("El producto " + nombreProducto + " no existe en la sección " + nombre);
@@ -38,11 +40,17 @@ public class Secciones {
 	    }
 	    if (compraOVenta) {
 	        // true compra
+	    	System.out.println("Ingrese cantidad:");
+	    	int cantidad=sc.nextInt();
+	    	sc.nextLine();
 	        producto.compra(proveedor, cantidad);
 	        System.out.println("Compra realizada: " + cantidad + " unidades de " + nombreProducto);
 	    } 
 	    else {
 	        // false vende
+	    	System.out.println("Ingrese cantidad:");
+	    	int cantidad=sc.nextInt();
+	    	sc.nextLine();
 	        if (cantidad > producto.getStock()) {
 	            System.out.println("No hay suficiente stock para vender " + cantidad + " unidades de " + nombreProducto);
 	        }   
@@ -53,4 +61,13 @@ public class Secciones {
 	    }
 	}
 	
+	public void informacionProducto(String nombre) {
+		Producto buscado = productos.get(nombre);
+		buscado.informacion();
+	}
+	
+	@Override
+	public String toString() {
+	    return" Productos: " + productos.keySet();
+	}
 }

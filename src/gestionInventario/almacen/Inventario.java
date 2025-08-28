@@ -3,14 +3,16 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 public class Inventario {
+	String nombreEmpresa;
 	private HashMap<String,Secciones> secciones;
 	
-	public Inventario() {
-		secciones = new HashMap<>();
+	public Inventario(String nombreEmpresa) {
+		this.nombreEmpresa=nombreEmpresa;
+		this.secciones = new HashMap<>();
 	}
 	
 	public void nuevaSeccion(String nombre) {
-		if(!secciones.containsKey(nombre)) {
+		if(!this.secciones.containsKey(nombre)) {
 			Secciones seccion= new Secciones(nombre);
 			this.secciones.put(nombre, seccion);
 		}
@@ -25,7 +27,7 @@ public class Inventario {
 		System.out.println("Ah que seccion desea agregar el producto?");
 		System.out.println(secciones);
 		String seccionBuscada=sc.nextLine();
-		Secciones seccion = secciones.get(seccionBuscada);
+		Secciones seccion = this.secciones.get(seccionBuscada);
 		if(seccion==null) {
 			System.out.println("LA SECCION BUSCADA NO EXISTE EN EL SISTEMA!!");
 			return;
@@ -33,7 +35,7 @@ public class Inventario {
 		seccion.agregarProducto(productos);
 	}
 	
-	public void compraYVenta(String nombreProducto, String proveedor, int cantidad) {
+	public void compraYVenta() {
 		Scanner sc = new Scanner(System.in);
 		System.out.println("Ah que seccion desea ingresar?");
 		System.out.println(secciones);
@@ -43,14 +45,33 @@ public class Inventario {
 			System.out.println("LA SECCION BUSCADA NO EXISTE EN EL SISTEMA!!");
 			return;
 		}
+		System.out.print("Ingrese nombre del producto: ");
+        String nombreProducto = sc.nextLine();
+        System.out.print("Ingrese proveedor: ");
+        String proveedor = sc.nextLine();
 		System.out.println("desea ingresar una compra o una venta?");
 		String opcion=sc.nextLine();
 		if(opcion.equals("compra")) {
-			seccion.CompraYventa(nombreProducto, true, proveedor, cantidad);
+			seccion.compraYVenta(nombreProducto, true, proveedor);
 		}
 		else {
-			seccion.CompraYventa(nombreProducto, false, proveedor, cantidad);
+			seccion.compraYVenta(nombreProducto, false, proveedor);
 		}
+	}
+	
+	public void informacionProducto() {
+		Scanner sc = new Scanner(System.in);
+		System.out.println("Ah que seccion desea ingresar?");
+		System.out.println(secciones);
+		String seccionBuscada=sc.nextLine();
+		Secciones seccion = secciones.get(seccionBuscada);
+		if(seccion==null) {
+			System.out.println("LA SECCION BUSCADA NO EXISTE EN EL SISTEMA!!");
+			return;
+		}
+		System.out.print("Ingrese nombre del producto: ");
+        String nombreProducto = sc.nextLine();
+        seccion.informacionProducto(nombreProducto);
 	}
 	
 }

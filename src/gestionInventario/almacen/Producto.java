@@ -21,7 +21,7 @@ public class Producto {
 	    return this.stock;
 	}
 	
-	public String nombre() {
+	public String getNombre() {
 		return this.nombre;
 	}
 	
