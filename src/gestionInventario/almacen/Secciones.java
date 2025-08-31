@@ -25,10 +25,14 @@ public class Secciones {
 		if(!productos.containsKey(producto.getNombre())){
 			productos.put(producto.getNombre(),producto);
 		}
-		
 		else {
 			System.out.println("EL PRODUCTO YA EXISTE!!!");
 		}
+	}
+	
+	public void agregarProducto(String nombre, String proveedor, int cantidad) {
+	    Producto producto = new Producto(nombre, proveedor, cantidad);
+	    agregarProducto(producto);
 	}
 	
 	public void compraYVenta(String nombreProducto, boolean compraOVenta, String proveedor) {

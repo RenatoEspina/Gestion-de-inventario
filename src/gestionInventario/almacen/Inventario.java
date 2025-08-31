@@ -3,7 +3,7 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 public class Inventario {
-	String nombreEmpresa;
+	private String nombreEmpresa;
 	private HashMap<String,Secciones> secciones;
 	
 	public Inventario(String nombreEmpresa) {
@@ -22,6 +22,15 @@ public class Inventario {
 		}
 	}
 	
+	public void nuevaSeccion(String nombre, Producto producto) {
+	    if(!this.secciones.containsKey(nombre)) {
+	        Secciones seccion = new Secciones(nombre, producto);
+	        this.secciones.put(nombre, seccion);
+	    } else {
+	        System.out.println("La sección ya existe!");
+	    }
+	}
+
 	public void agregarProducto(Producto productos) {
 		Scanner sc = new Scanner(System.in);
 		System.out.println("Ah que seccion desea agregar el producto?");
@@ -34,6 +43,16 @@ public class Inventario {
 		}
 		seccion.agregarProducto(productos);
 	}
+	
+	public void agregarProducto(String seccionNombre, Producto producto) {
+	    Secciones seccion = this.secciones.get(seccionNombre);
+	    if (seccion == null) {
+	        System.out.println("LA SECCIÓN " + seccionNombre + " NO EXISTE EN EL SISTEMA!!");
+	        return;
+	    }
+	    seccion.agregarProducto(producto);
+	}
+
 	
 	public void compraYVenta() {
 		Scanner sc = new Scanner(System.in);

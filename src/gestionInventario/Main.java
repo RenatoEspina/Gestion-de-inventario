@@ -7,12 +7,33 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-
         System.out.print("Ingrese nombre de la empresa: ");
         String nombre = sc.nextLine();
         Inventario almacen = new Inventario(nombre);
         Consola.limpiarPantalla();
 
+        String opcionP;
+        System.out.print("Desea precargar datos para testeo? (si/no): ");
+        opcionP= sc.nextLine();
+        if(opcionP.equals("si")) {
+        	almacen.nuevaSeccion("Electronica");
+            almacen.nuevaSeccion("Alimentos");
+            almacen.nuevaSeccion("Ropa");
+            Producto p1 = new Producto("Televisor", "LG", 10);
+            Producto p2 = new Producto("Celular", "Samsung", 15);
+            Producto p3 = new Producto("Leche", "Colun", 30);
+            Producto p4 = new Producto("Pan", "Bimbo", 25);
+            Producto p5 = new Producto("Polera", "Adidas", 20);
+            almacen.agregarProducto("Electronica",p1);
+            almacen.agregarProducto("Electronica",p2);
+            almacen.agregarProducto("Alimentos",p3);
+            almacen.agregarProducto("Alimentos",p4);
+            almacen.agregarProducto("Ropa",p5);
+
+            Consola.enterParaContinuar(sc);
+            Consola.limpiarPantalla();
+
+        }
         int opcion = 0;
 
         while (opcion != 5) {

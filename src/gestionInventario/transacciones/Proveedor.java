@@ -1,9 +1,9 @@
 package gestionInventario.transacciones;
+import java.util.ArrayList;
 
 public class Proveedor {
-	private static final int MAX = 100000;
-	
 	private String nombre;
-	private Factura[] factura;  
+	private ArrayList <Factura> factura;
+	
 }
  
