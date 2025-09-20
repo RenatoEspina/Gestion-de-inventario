@@ -25,6 +25,30 @@ public class Producto {
 		return this.nombre;
 	}
 	
+	public ArrayList<String> getProveedores() {
+	    return this.proveedores;
+	}
+
+	public int getComprasTotales() {
+	    return this.compras;
+	}
+
+	public int getVentasTotales() {
+	    return this.ventas;
+	}
+
+	public void agregarProveedor(String proveedor) {
+	    if (!this.proveedores.contains(proveedor)) {
+	        this.proveedores.add(proveedor);
+	    }
+	}
+
+	public void ajustarComprasVentas(int comprasTotales, int ventasTotales) {
+	    this.compras = comprasTotales;
+	    this.ventas = ventasTotales;
+	    this.stock = comprasTotales - ventasTotales;
+	}
+	
 	public void compra(String proveedor, int compra) {
 		if(!this.proveedores.contains(proveedor)) {
 			this.proveedores.add(proveedor);

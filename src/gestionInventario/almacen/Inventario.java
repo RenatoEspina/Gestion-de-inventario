@@ -53,6 +53,9 @@ public class Inventario {
 	    seccion.agregarProducto(producto);
 	}
 
+	public HashMap<String, Secciones> getSecciones() {
+	    return this.secciones;
+	}
 	
 	public void compraYVenta() {
 		Scanner sc = new Scanner(System.in);

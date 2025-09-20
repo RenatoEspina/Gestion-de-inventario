@@ -21,6 +21,10 @@ public class Secciones {
 		return this.nombre;
 	}
 	
+	public HashMap<String, Producto> getProductos() {
+	    return this.productos;
+	}
+	
 	public void agregarProducto(Producto producto) {
 		if(!productos.containsKey(producto.getNombre())){
 			productos.put(producto.getNombre(),producto);
