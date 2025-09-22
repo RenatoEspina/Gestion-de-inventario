@@ -1,17 +1,37 @@
 package gestionInventario.utilidades;
 
-import gestionInventario.almacen.Inventario;
-import gestionInventario.almacen.Secciones;
-import gestionInventario.almacen.Producto;
+import gestionInventario.almacen.*;
 import java.util.List;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.File;
 
 public class GestorPersistencia {
     private String rutaBase;
     
     public GestorPersistencia(String rutaBase) {
         this.rutaBase = rutaBase;
+
+        // Crear carpeta si no existe
+        File carpeta = new File(rutaBase);
+        if (!carpeta.exists()) {
+            carpeta.mkdirs();
+        }
+
+        // Crear archivos CSV si no existen
+        crearArchivoSiNoExiste(rutaBase + "secciones.csv", "nombre_seccion\n");
+        crearArchivoSiNoExiste(rutaBase + "productos.csv", "seccion,nombre,proveedores,compras_totales,ventas_totales\n");
+    }
+    
+    private void crearArchivoSiNoExiste(String rutaArchivo, String encabezado) {
+        File archivo = new File(rutaArchivo);
+        if (!archivo.exists()) {
+            try (FileWriter writer = new FileWriter(archivo)) {
+                writer.write(encabezado);
+            } catch (IOException e) {
+                System.err.println("No se pudo crear el archivo: " + rutaArchivo + " -> " + e.getMessage());
+            }
+        }
     }
     
     /**
@@ -67,8 +87,8 @@ public class GestorPersistencia {
     /**
      * Carga el inventario desde archivos CSV
      */
-    public Inventario cargarInventario(String nombreEmpresa) {
-        Inventario inventario = new Inventario(nombreEmpresa);
+    public Inventario cargarInventario() {
+        Inventario inventario = new Inventario();
         
         // Primero cargar las secciones
         cargarSecciones(inventario);

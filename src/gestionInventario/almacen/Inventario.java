@@ -3,11 +3,9 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 public class Inventario {
-	private String nombreEmpresa;
 	private HashMap<String,Secciones> secciones;
 	
-	public Inventario(String nombreEmpresa) {
-		this.nombreEmpresa=nombreEmpresa;
+	public Inventario() {
 		this.secciones = new HashMap<>();
 	}
 	
@@ -31,10 +29,11 @@ public class Inventario {
 	    }
 	}
 
-	public void agregarProducto(Producto productos) {
-		Scanner sc = new Scanner(System.in);
+	public void agregarProducto(Producto productos, Scanner sc) {
 		System.out.println("Ah que seccion desea agregar el producto?");
-		System.out.println(secciones);
+		for (String key : secciones.keySet()) {
+		    System.out.println("- " + key);
+		}
 		String seccionBuscada=sc.nextLine();
 		Secciones seccion = this.secciones.get(seccionBuscada);
 		if(seccion==null) {
@@ -57,10 +56,11 @@ public class Inventario {
 	    return this.secciones;
 	}
 	
-	public void compraYVenta() {
-		Scanner sc = new Scanner(System.in);
+	public void compraYVenta(Scanner sc) {
 		System.out.println("Ah que seccion desea ingresar?");
-		System.out.println(secciones);
+		for (String key : secciones.keySet()) {
+		    System.out.println("- " + key);
+		}
 		String seccionBuscada=sc.nextLine();
 		Secciones seccion = secciones.get(seccionBuscada);
 		if(seccion==null) {
@@ -74,17 +74,18 @@ public class Inventario {
 		System.out.println("desea ingresar una compra o una venta?");
 		String opcion=sc.nextLine();
 		if(opcion.equals("compra")) {
-			seccion.compraYVenta(nombreProducto, true, proveedor);
+			seccion.compraYVenta(nombreProducto, true, proveedor, sc);
 		}
 		else {
-			seccion.compraYVenta(nombreProducto, false, proveedor);
+			seccion.compraYVenta(nombreProducto, false, proveedor, sc);
 		}
 	}
 	
-	public void informacionProducto() {
-		Scanner sc = new Scanner(System.in);
+	public void informacionProducto(Scanner sc) {
 		System.out.println("Ah que seccion desea ingresar?");
-		System.out.println(secciones);
+		for (String key : secciones.keySet()) {
+		    System.out.println("- " + key);
+		}
 		String seccionBuscada=sc.nextLine();
 		Secciones seccion = secciones.get(seccionBuscada);
 		if(seccion==null) {

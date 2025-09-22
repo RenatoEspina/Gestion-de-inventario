@@ -39,8 +39,7 @@ public class Secciones {
 	    agregarProducto(producto);
 	}
 	
-	public void compraYVenta(String nombreProducto, boolean compraOVenta, String proveedor) {
-		Scanner sc= new Scanner(System.in);
+	public void compraYVenta(String nombreProducto, boolean compraOVenta, String proveedor, Scanner sc) {
 	    Producto producto = productos.get(nombreProducto);
 	    if (producto == null) {
 	        System.out.println("El producto " + nombreProducto + " no existe en la sección " + nombre);
@@ -71,11 +70,16 @@ public class Secciones {
 	
 	public void informacionProducto(String nombre) {
 		Producto buscado = productos.get(nombre);
+		if (buscado == null) {
+		    System.out.println("El producto no existe en esta sección");
+		    return;
+		}
 		buscado.informacion();
+
 	}
 	
 	@Override
 	public String toString() {
-	    return" Productos: " + productos.keySet();
+	    return nombre;
 	}
 }

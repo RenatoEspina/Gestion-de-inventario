@@ -7,23 +7,15 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        System.out.print("Ingrese nombre de la empresa: ");
-        String nombre = sc.nextLine();
-        Inventario almacen = new Inventario(nombre);
+        Inventario almacen = new Inventario();
         GestorPersistencia gestor = new GestorPersistencia("data/");
-        Consola.limpiarPantalla();
-
-        System.out.print("¿Desea cargar datos existentes? (si/no): ");
-        String cargar = sc.nextLine();
-        if (cargar.equals("si")) {
-            almacen = gestor.cargarInventario(nombre);
-        }
+        almacen = gestor.cargarInventario();
         
         int opcion = 0;
 
         while (opcion != 5) {
             Consola.limpiarPantalla();
-            System.out.println("\nSistema de Inventario - Empresa: " + nombre);
+            System.out.println("\nSistema de Inventario");
             System.out.println("1.- Crear nueva sección");
             System.out.println("2.- Agregar producto");
             System.out.println("3.- Compra/Venta de producto");
@@ -52,24 +44,25 @@ public class Main {
                     int cantidad = sc.nextInt();
                     sc.nextLine();
                     Producto producto = new Producto(nombreProducto, proveedor, cantidad);
-                    almacen.agregarProducto(producto);
+                    almacen.agregarProducto(producto, sc);
                     Consola.enterParaContinuar(sc);
                     break;
 
                 case 3:
                     Consola.limpiarPantalla();
-                    almacen.compraYVenta();
+                    almacen.compraYVenta(sc);
                     Consola.enterParaContinuar(sc);
                     break;
 
                 case 4:
                 	Consola.limpiarPantalla();
-                	almacen.informacionProducto();
+                	almacen.informacionProducto(sc);
                 	Consola.enterParaContinuar(sc);
                 	break;
                 	
                 case 5:
-                    System.out.println("Saliendo del sistema...");
+                	gestor.guardarInventario(almacen);
+                	System.out.println("Inventario guardado correctamente. Saliendo...");
                     break;
 
                 default:
