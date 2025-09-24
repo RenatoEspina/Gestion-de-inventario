@@ -1,4 +1,5 @@
 package gestionInventario.almacen;
+
 import java.util.ArrayList;
 
 public class Producto {
@@ -69,5 +70,11 @@ public class Producto {
 		System.out.println("Compras: " + compras);
 		System.out.println("Ventas: " + ventas);
 	}
+	
+	@Override
+	public String toString() {
+	    return nombre;
+	}
+	
 }
 

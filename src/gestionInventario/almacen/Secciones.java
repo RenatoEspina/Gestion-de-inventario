@@ -1,6 +1,7 @@
 package gestionInventario.almacen;
+
 import java.util.HashMap;
-import java.util.Scanner;
+import gestionInventario.utilidades.Consola;
 
 public class Secciones {
 	private String nombre;
@@ -25,6 +26,14 @@ public class Secciones {
 	    return this.productos;
 	}
 	
+	public void eliminarProducto(String nombre) {
+	    if (productos.remove(nombre) == null) {
+	        System.out.println("No existe el producto para eliminar.");
+	    } else {
+	        System.out.println("Producto eliminado.");
+	    }
+	}
+	
 	public void agregarProducto(Producto producto) {
 		if(!productos.containsKey(producto.getNombre())){
 			productos.put(producto.getNombre(),producto);
@@ -34,12 +43,7 @@ public class Secciones {
 		}
 	}
 	
-	public void agregarProducto(String nombre, String proveedor, int cantidad) {
-	    Producto producto = new Producto(nombre, proveedor, cantidad);
-	    agregarProducto(producto);
-	}
-	
-	public void compraYVenta(String nombreProducto, boolean compraOVenta, String proveedor, Scanner sc) {
+	public void compraYVenta(String nombreProducto, boolean compraOVenta) {
 	    Producto producto = productos.get(nombreProducto);
 	    if (producto == null) {
 	        System.out.println("El producto " + nombreProducto + " no existe en la sección " + nombre);
@@ -47,17 +51,14 @@ public class Secciones {
 	    }
 	    if (compraOVenta) {
 	        // true compra
-	    	System.out.println("Ingrese cantidad:");
-	    	int cantidad=sc.nextInt();
-	    	sc.nextLine();
+	    	int cantidad=Consola.leerEntero("Ingrese cantidad: ");
+	    	String proveedor=Consola.leerString("Ingrese proveedor: ");
 	        producto.compra(proveedor, cantidad);
 	        System.out.println("Compra realizada: " + cantidad + " unidades de " + nombreProducto);
 	    } 
 	    else {
 	        // false vende
-	    	System.out.println("Ingrese cantidad:");
-	    	int cantidad=sc.nextInt();
-	    	sc.nextLine();
+	    	int cantidad=Consola.leerEntero("Ingrese cantidad:");
 	        if (cantidad > producto.getStock()) {
 	            System.out.println("No hay suficiente stock para vender " + cantidad + " unidades de " + nombreProducto);
 	        }   
@@ -76,6 +77,16 @@ public class Secciones {
 		}
 		buscado.informacion();
 
+	}
+	
+	public void listarProductos() {
+	    if (productos.isEmpty()) {
+	        System.out.println("No hay productos en esta sección.");
+	        return;
+	    }
+	    for (String key : productos.keySet()) {
+		    System.out.println("- " + key);
+		}
 	}
 	
 	@Override
