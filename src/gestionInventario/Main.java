@@ -85,14 +85,15 @@ public class Main {
     // Menú para Productos
     private static void menuProductos(Inventario almacen) {
         int opcion = 0;
-        while (opcion != 5) {
+        while (opcion != 6) {
             Consola.limpiarPantalla();
             String menu = "\nMenú Productos\n"
                         + "1.- Agregar Producto\n"
                         + "2.- Eliminar Producto\n"
                         + "3.- Comprar Producto\n"
                         + "4.- Vender Producto\n"
-                        + "5.- Volver\n";
+                        + "5.- Generar Reporte de Ventas"
+                        + "6.- Volver\n";
             opcion = Consola.leerEntero(menu + "Opción: ", true);
 
             switch (opcion) {
@@ -153,6 +154,11 @@ public class Main {
                     break;
 
                 case 5:
+                	Consola.limpiarPantalla();
+                	int ventaFiltrada =Consola.leerEntero("Ingrese la cantidad minima de ventas buscadas: ");
+                	almacen.filtrarProductos(ventaFiltrada);
+                	
+                case 6:
                 	Consola.limpiarPantalla();
                     break;
 

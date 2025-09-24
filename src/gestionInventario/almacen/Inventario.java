@@ -1,7 +1,10 @@
 package gestionInventario.almacen;
 
 import gestionInventario.utilidades.Consola;
+import gestionInventario.utilidades.ExportadorCSV;
 import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Inventario {
 	private HashMap<String,Secciones> secciones;
@@ -106,6 +109,49 @@ public class Inventario {
 	        return;
 	    }
 	    seccion.venderProducto(nombreProducto, cantidad);
+	}
+	
+	public void filtrarProductos(int ventas) {
+	    int sumatoriaTotal = 0;
+	    boolean encontroAlMenosUno = false;
+
+	    // Lista para guardar secciones que cumplen el criterio
+	    List<Secciones> seccionesFiltradas = new ArrayList<>();
+
+	    for (Secciones s : secciones.values()) {
+	        int sumatoriaSec = 0;
+	        boolean encontroEnSeccion = false;
+
+	        System.out.println("\n-Sección: " + s.getNombre());
+
+	        for (Producto p : s.getProductos().values()) {
+	            if (p.getVentasTotales() >= ventas) {
+	                encontroEnSeccion = true;
+	                encontroAlMenosUno = true;
+	                sumatoriaSec += p.getVentasTotales();
+	                System.out.println("   - " + p.getNombre() + " tiene " + p.getVentasTotales() + " ventas.");
+	            }
+	        }
+
+	        if (!encontroEnSeccion) {
+	            System.out.println("   No existen productos con las ventas solicitadas en esta sección.");
+	        } else {
+	            sumatoriaTotal += sumatoriaSec;
+	            seccionesFiltradas.add(s); // Guardamos la sección que tiene productos que cumplen el criterio
+	            System.out.println("   Total de ventas en la sección: " + sumatoriaSec);
+	        }
+	    }
+
+	    if (!encontroAlMenosUno) {
+	        System.out.println("\nNo se encontraron productos que cumplan el criterio.");
+	    } else {
+	        System.out.println("\nHubo un total de " + sumatoriaTotal + " ventas en todas las secciones.");
+	    }
+
+	    String opcion = Consola.leerString("¿Desea generar un archivo reporte? (si/no): ");
+	    if (opcion.equalsIgnoreCase("si")) {
+	    	ExportadorCSV.generarReporte(seccionesFiltradas, ventas);
+	    }
 	}
 	
 	public void informacionProducto() {
