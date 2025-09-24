@@ -1,7 +1,7 @@
 package gestionInventario.almacen;
 
 import java.util.HashMap;
-import gestionInventario.utilidades.Consola;
+
 
 public class Secciones {
 	private String nombre;
@@ -43,32 +43,30 @@ public class Secciones {
 		}
 	}
 	
-	public void compraYVenta(String nombreProducto, boolean compraOVenta) {
+	public void comprarProducto(String nombreProducto, int cantidad, String proveedor) {
 	    Producto producto = productos.get(nombreProducto);
 	    if (producto == null) {
 	        System.out.println("El producto " + nombreProducto + " no existe en la sección " + nombre);
 	        return;
 	    }
-	    if (compraOVenta) {
-	        // true compra
-	    	int cantidad=Consola.leerEntero("Ingrese cantidad: ");
-	    	String proveedor=Consola.leerString("Ingrese proveedor: ");
-	        producto.compra(proveedor, cantidad);
-	        System.out.println("Compra realizada: " + cantidad + " unidades de " + nombreProducto);
-	    } 
-	    else {
-	        // false vende
-	    	int cantidad=Consola.leerEntero("Ingrese cantidad:");
-	        if (cantidad > producto.getStock()) {
-	            System.out.println("No hay suficiente stock para vender " + cantidad + " unidades de " + nombreProducto);
-	        }   
-	        else {
-	            producto.venta(cantidad);
-	            System.out.println("Venta realizada: " + cantidad + " unidades de " + nombreProducto);
-	        }
+	    producto.compra(proveedor, cantidad);
+	    System.out.println("Compra realizada: " + cantidad + " unidades de " + nombreProducto);
+	}
+
+	public void venderProducto(String nombreProducto, int cantidad) {
+	    Producto producto = productos.get(nombreProducto);
+	    if (producto == null) {
+	        System.out.println("El producto " + nombreProducto + " no existe en la sección " + nombre);
+	        return;
+	    }
+	    if (cantidad > producto.getStock()) {
+	        System.out.println("No hay suficiente stock para vender " + cantidad + " unidades de " + nombreProducto);
+	    } else {
+	        producto.venta(cantidad);
+	        System.out.println("Venta realizada: " + cantidad + " unidades de " + nombreProducto);
 	    }
 	}
-	
+
 	public void informacionProducto(String nombre) {
 		Producto buscado = productos.get(nombre);
 		if (buscado == null) {

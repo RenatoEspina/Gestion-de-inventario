@@ -74,7 +74,5 @@ public class Producto {
 	@Override
 	public String toString() {
 	    return nombre;
-	}
-	
+	}	
 }
-

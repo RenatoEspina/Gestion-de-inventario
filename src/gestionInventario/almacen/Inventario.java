@@ -25,6 +25,16 @@ public class Inventario {
 		}
 	}
 
+	public void eliminarSeccion(String nombre) {
+		if(this.secciones.containsKey(nombre)) {
+			secciones.remove(nombre);
+		}
+		
+		else {
+			System.out.println("LA SECCION NO EXISTE!!!");
+		}
+	}
+	
 	public void eliminarProducto(String Nombre) {
 		for(Secciones s: secciones.values()) {
 			System.out.println("Buscando...");
@@ -70,25 +80,32 @@ public class Inventario {
 	    seccion.agregarProducto(producto);
 	}
 	
-	public void compraYVenta() {
-		System.out.println("Ah que seccion desea ingresar?");
-		for (String key : secciones.keySet()) {
-		    System.out.println("- " + key);
-		}
-		String seccionBuscada = Consola.leerString(null);
-		Secciones seccion = secciones.get(seccionBuscada);
-		if(seccion==null) {
-			System.out.println("LA SECCION BUSCADA NO EXISTE EN EL SISTEMA!!");
-			return;
-		}
-        String nombreProducto = Consola.leerString("Ingrese nombre del producto: ");
-		String opcion = Consola.leerString("desea ingresar una compra o una venta?");
-		if(opcion.equals("compra")) {
-			seccion.compraYVenta(nombreProducto, true);
-		}
-		else {
-			seccion.compraYVenta(nombreProducto, false);
-		}
+	public void comprarProducto(String nombreProducto, int cantidad, String proveedor) {
+	    System.out.println("¿A qué sección desea ingresar?");
+	    for (String key : secciones.keySet()) {
+	        System.out.println("- " + key);
+	    }
+	    String seccionBuscada = Consola.leerString(null);
+	    Secciones seccion = secciones.get(seccionBuscada);
+	    if (seccion == null) {
+	        System.out.println("LA SECCIÓN BUSCADA NO EXISTE EN EL SISTEMA!!");
+	        return;
+	    }
+	    seccion.comprarProducto(nombreProducto, cantidad, proveedor);
+	}
+
+	public void venderProducto(String nombreProducto, int cantidad) {
+	    System.out.println("¿A qué sección desea ingresar?");
+	    for (String key : secciones.keySet()) {
+	        System.out.println("- " + key);
+	    }
+	    String seccionBuscada = Consola.leerString(null);
+	    Secciones seccion = secciones.get(seccionBuscada);
+	    if (seccion == null) {
+	        System.out.println("LA SECCIÓN BUSCADA NO EXISTE EN EL SISTEMA!!");
+	        return;
+	    }
+	    seccion.venderProducto(nombreProducto, cantidad);
 	}
 	
 	public void informacionProducto() {
@@ -108,5 +125,4 @@ public class Inventario {
         String nombreProducto = Consola.leerString("Ingrese nombre del producto: ");
         seccion.informacionProducto(nombreProducto);
 	}
-	
 }

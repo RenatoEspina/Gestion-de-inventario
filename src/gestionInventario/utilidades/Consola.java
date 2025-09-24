@@ -1,5 +1,8 @@
 package gestionInventario.utilidades;
+
 import java.util.Scanner;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
 public class Consola {
 	private static Scanner sc= new Scanner(System.in);
@@ -20,7 +23,7 @@ public class Consola {
                 if (mensaje != null) System.out.print(mensaje);
                 return Integer.parseInt(sc.nextLine().trim());
             } catch (NumberFormatException e) {
-                System.out.println("⚠ Error: Debes ingresar un número entero válido.");
+                System.out.println("Error: Debes ingresar un número entero válido.");
             }
         }
     }
@@ -32,7 +35,7 @@ public class Consola {
                 if (mensaje != null) System.out.print(mensaje);
                 return Integer.parseInt(sc.nextLine().trim());
             } catch (NumberFormatException e) {
-                System.out.println("⚠ Error: Debes ingresar un número entero válido.");
+                System.out.println("Error: Debes ingresar un número entero válido.");
             }
         }
     }
@@ -43,7 +46,19 @@ public class Consola {
             if (mensaje != null) System.out.print(mensaje);
             String input = sc.nextLine().trim();
             if (!input.isEmpty()) return input;
-            System.out.println("⚠ Error: No puedes dejar el campo vacío.");
+            System.out.println("Error: No puedes dejar el campo vacío.");
+        }
+    }
+    
+    public static LocalDate leerFecha(String mensaje) {
+        while (true) {
+            if (mensaje != null) System.out.print(mensaje);
+            String input = sc.nextLine().trim();
+            try {
+                return LocalDate.parse(input); // espera formato YYYY-MM-DD
+            } catch (DateTimeParseException e) {
+                System.out.println("Error: Debes ingresar una fecha válida en formato YYYY-MM-DD.");
+            }
         }
     }
 }
