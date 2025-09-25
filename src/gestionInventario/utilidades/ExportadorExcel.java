@@ -8,8 +8,40 @@ import java.util.List;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+/**
+ * Clase utilitaria para generar reportes en formato Excel de las ventas del inventario.
+ * <p>
+ * Utiliza la biblioteca Apache POI para crear archivos XLSX con información filtrada
+ * sobre productos y sus ventas. Genera reportes estructurados con formato profesional.
+ * </p>
+ * 
+ * @author Renato Espina
+ * @version 1.0
+ * @see Secciones
+ * @see Producto
+ * @see XSSFWorkbook
+ */
 public class ExportadorExcel {
 
+    /**
+     * Genera un archivo Excel con un reporte de productos que superan un mínimo de ventas.
+     * <p>
+     * El reporte incluye:
+     * </p>
+     * <ul>
+     *   <li>Nombre de la sección</li>
+     *   <li>Nombre del producto</li>
+     *   <li>Cantidad de ventas</li>
+     *   <li>Total general de ventas</li>
+     * </ul>
+     * <p>
+     * El archivo se guarda como "Reporte_Ventas.xlsx" en el directorio actual.
+     * </p>
+     * 
+     * @param seccionesFiltradas Lista de secciones que contienen productos que cumplen el criterio
+     * @param ventasMinimos Número mínimo de ventas requerido para incluir un producto en el reporte
+     * @throws RuntimeException si ocurre un error durante la creación o escritura del archivo
+     */
     public static void generarReporte(List<Secciones> seccionesFiltradas, int ventasMinimos) {
         XSSFWorkbook workbook = new XSSFWorkbook(); // Usamos directamente XSSFWorkbook
         try {
@@ -35,6 +67,7 @@ public class ExportadorExcel {
             int rowIndex = 1;
             int totalVentas = 0;
 
+            // Llenar datos
             for (Secciones s : seccionesFiltradas) {
                 for (Producto p : s.getProductos().values()) {
                     if (p.getVentasTotales() >= ventasMinimos) {

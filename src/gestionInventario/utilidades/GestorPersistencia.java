@@ -8,9 +8,33 @@ import java.io.IOException;
 import java.io.File;
 import java.time.LocalDate;
 
+/**
+ * Clase responsable de la persistencia de datos del sistema de inventario.
+ * <p>
+ * Garda y carga el estado completo del inventario desde archivos CSV, permitiendo
+ * la recuperación de sesiones anteriores. Maneja tanto las secciones como los productos
+ * con sus tipos específicos (normal, premium, perecible).
+ * </p>
+ * 
+ * @author Renato Espina
+ * @version 1.0
+ * @see Inventario
+ * @see Secciones
+ * @see Producto
+ * @see ProductoPerecible
+ * @see ProductoPremium
+ */
 public class GestorPersistencia {
     private String rutaBase;
     
+    /**
+     * Constructor que inicializa el gestor de persistencia con una ruta base.
+     * <p>
+     * Crea la estructura de directorios y archivos CSV necesarios si no existen.
+     * </p>
+     * 
+     * @param rutaBase La ruta del directorio donde se almacenarán los archivos CSV
+     */
     public GestorPersistencia(String rutaBase) {
         this.rutaBase = rutaBase;
 
@@ -25,6 +49,12 @@ public class GestorPersistencia {
         crearArchivoSiNoExiste(rutaBase + "productos.csv", "seccion,nombre,proveedores,compras_totales,ventas_totales,fecha_vencimiento,stock_maximo\n");
     }
     
+    /**
+     * Crea un archivo CSV con el encabezado especificado si no existe.
+     * 
+     * @param rutaArchivo La ruta completa del archivo a crear
+     * @param encabezado  El encabezado CSV para el archivo
+     */
     private void crearArchivoSiNoExiste(String rutaArchivo, String encabezado) {
         File archivo = new File(rutaArchivo);
         if (!archivo.exists()) {
@@ -40,11 +70,25 @@ public class GestorPersistencia {
     // Guardar inventario
     // ------------------------------------------------------------
     
+    /**
+     * Guarda el estado completo del inventario en archivos CSV.
+     * <p>
+     * Serializa tanto las secciones como los productos en formato CSV
+     * para su posterior recuperación.
+     * </p>
+     * 
+     * @param inventario El inventario a guardar
+     */
     public void guardarInventario(Inventario inventario) {
         guardarSecciones(inventario);
         guardarProductos(inventario);
     }
     
+    /**
+     * Guarda las secciones del inventario en el archivo CSV correspondiente.
+     * 
+     * @param inventario El inventario del cual extraer las secciones
+     */
     private void guardarSecciones(Inventario inventario) {
         try (FileWriter writer = new FileWriter(rutaBase + "secciones.csv")) {
             writer.write("nombre_seccion\n");
@@ -56,6 +100,15 @@ public class GestorPersistencia {
         }
     }
     
+    /**
+     * Guarda los productos del inventario en el archivo CSV correspondiente.
+     * <p>
+     * Incluye información específica para cada tipo de producto (fecha de vencimiento
+     * para perecibles, stock máximo para premium).
+     * </p>
+     * 
+     * @param inventario El inventario del cual extraer los productos
+     */
     private void guardarProductos(Inventario inventario) {
         try (FileWriter writer = new FileWriter(rutaBase + "productos.csv")) {
             writer.write("seccion,nombre,proveedores,compras_totales,ventas_totales,fecha_vencimiento,stock_maximo\n");
@@ -89,6 +142,15 @@ public class GestorPersistencia {
     // Cargar inventario
     // ------------------------------------------------------------
     
+    /**
+     * Carga un inventario desde los archivos CSV almacenados.
+     * <p>
+     * Reconstruye completamente el estado del inventario, incluyendo
+     * secciones, productos y sus tipos específicos.
+     * </p>
+     * 
+     * @return Un nuevo objeto Inventario cargado con los datos persistidos
+     */
     public Inventario cargarInventario() {
         Inventario inventario = new Inventario();
         cargarSecciones(inventario);
@@ -96,6 +158,11 @@ public class GestorPersistencia {
         return inventario;
     }
     
+    /**
+     * Carga las secciones desde el archivo CSV al inventario.
+     * 
+     * @param inventario El inventario donde cargar las secciones
+     */
     private void cargarSecciones(Inventario inventario) {
         LectorCSV lector = new LectorCSV(rutaBase + "secciones.csv");
         List<List<String>> datos = lector.readAll();
@@ -115,6 +182,15 @@ public class GestorPersistencia {
         }
     }
     
+    /**
+     * Carga los productos desde el archivo CSV al inventario.
+     * <p>
+     * Reconstruye los productos con sus tipos específicos basándose en
+     * los campos de fecha_vencimiento y stock_maximo.
+     * </p>
+     * 
+     * @param inventario El inventario donde cargar los productos
+     */
     private void cargarProductos(Inventario inventario) {
         LectorCSV lector = new LectorCSV(rutaBase + "productos.csv");
         List<List<String>> datos = lector.readAll();
@@ -176,6 +252,16 @@ public class GestorPersistencia {
     // Métodos auxiliares CSV
     // ------------------------------------------------------------
     
+    /**
+     * Escapa una cadena para formato CSV.
+     * <p>
+     * Encierra entre comillas las cadenas que contienen comas, comillas dobles
+     * o saltos de línea, y duplica las comillas internas.
+     * </p>
+     * 
+     * @param value La cadena a escapar
+     * @return La cadena escapada para CSV
+     */
     private String escapeCSV(String value) {
         if (value == null) return "";
         if (value.contains(",") || value.contains("\"") || value.contains("\n")) {
@@ -184,6 +270,16 @@ public class GestorPersistencia {
         return value;
     }
     
+    /**
+     * Remueve el escapado CSV de una cadena.
+     * <p>
+     * Elimina las comillas exteriores y convierte las comillas dobles internas
+     * a comillas simples.
+     * </p>
+     * 
+     * @param value La cadena escapada a procesar
+     * @return La cadena sin escapado CSV
+     */
     private String unescapeCSV(String value) {
         if (value == null) return "";
         if (value.startsWith("\"") && value.endsWith("\"")) {
@@ -193,4 +289,3 @@ public class GestorPersistencia {
         return value;
     }
 }
-
