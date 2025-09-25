@@ -92,7 +92,7 @@ public class Main {
                         + "2.- Eliminar Producto\n"
                         + "3.- Comprar Producto\n"
                         + "4.- Vender Producto\n"
-                        + "5.- Generar Reporte de Ventas"
+                        + "5.- Generar Reporte de Ventas\n"
                         + "6.- Volver\n";
             opcion = Consola.leerEntero(menu + "Opción: ", true);
 

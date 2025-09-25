@@ -1,7 +1,7 @@
 package gestionInventario.almacen;
 
 import gestionInventario.utilidades.Consola;
-import gestionInventario.utilidades.ExportadorCSV;
+import gestionInventario.utilidades.ExportadorExcel;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.List;
@@ -150,7 +150,7 @@ public class Inventario {
 
 	    String opcion = Consola.leerString("¿Desea generar un archivo reporte? (si/no): ");
 	    if (opcion.equalsIgnoreCase("si")) {
-	    	ExportadorCSV.generarReporte(seccionesFiltradas, ventas);
+	    	ExportadorExcel.generarReporte(seccionesFiltradas, ventas);
 	    }
 	}
 	
