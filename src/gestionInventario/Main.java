@@ -4,6 +4,7 @@ import gestionInventario.almacen.*;
 import gestionInventario.almacen.subProductos.*;
 import gestionInventario.utilidades.*;
 import java.time.LocalDate;
+import gestionInventario.excepciones.*;
 
 public class Main {
     public static void main(String[] args) {
@@ -98,43 +99,46 @@ public class Main {
 
             switch (opcion) {
             
-            case 1:
-                Consola.limpiarPantalla();
-                String nombreProducto = Consola.leerString("Ingrese nombre del producto: ");
-                String proveedor = Consola.leerString("Ingrese proveedor: ");
-                int cantidad = Consola.leerEntero("Ingrese compra inicial: ");
+            	case 1:
+            		Consola.limpiarPantalla();
+            		String nombreProducto = Consola.leerString("Ingrese nombre del producto: ");
+            		String proveedor = Consola.leerString("Ingrese proveedor: ");
+            		int cantidad = Consola.leerEntero("Ingrese compra inicial: ");
+            		String tipo = Consola.leerString("Tipo de producto (normal/premium/perecible): ");
 
-                // Preguntar tipo de producto
-                String tipo = Consola.leerString("Tipo de producto (normal/premium/perecible): ");
+            		switch(tipo.toLowerCase()) {
+                    	case "premium":
+                    		int stockMax = Consola.leerEntero("Ingrese stock máximo permitido: ");
+                    		ProductoPremium premium = new ProductoPremium(nombreProducto, proveedor, cantidad, stockMax);
+                    		almacen.agregarProducto(premium);
+                    		break;
+                    	case "perecible":
+                    		LocalDate fechaVenc = Consola.leerFecha("Ingrese fecha de vencimiento (YYYY-MM-DD): ");
+                    		ProductoPerecible perecible = new ProductoPerecible(nombreProducto, proveedor, cantidad, fechaVenc);
+                    		almacen.agregarProducto(perecible);
+                    		break;
+                    	default:
+                    		Producto normal = new Producto(nombreProducto, proveedor, cantidad);
+                    		almacen.agregarProducto(normal);
+                    		break;
+            		}
 
-                switch(tipo.toLowerCase()) {
-                    case "premium":
-                        int stockMax = Consola.leerEntero("Ingrese stock máximo permitido: ");
-                        ProductoPremium premium = new ProductoPremium(nombreProducto, proveedor, cantidad, stockMax);
-                        almacen.agregarProducto(premium);
-                        break;
-                    case "perecible":
-                        LocalDate fechaVenc = Consola.leerFecha("Ingrese fecha de vencimiento (YYYY-MM-DD): ");
-                        ProductoPerecible perecible = new ProductoPerecible(nombreProducto, proveedor, cantidad, fechaVenc);
-                        almacen.agregarProducto(perecible);
-                        break;
-                    default:
-                        Producto normal = new Producto(nombreProducto, proveedor, cantidad);
-                        almacen.agregarProducto(normal);
-                        break;
-                }
+            		System.out.println("Producto agregado correctamente.");
+            		Consola.enterParaContinuar();
+            		break;
 
-                System.out.println("Producto agregado correctamente.");
-                Consola.enterParaContinuar();
-                break;
-
-                case 2:
-                	Consola.limpiarPantalla();
-                    String nombreEliminar = Consola.leerString("Ingrese nombre del producto a eliminar: ");
-                    almacen.eliminarProducto(nombreEliminar);
-                    System.out.println("Producto eliminado correctamente.");
-                    Consola.enterParaContinuar();
-                    break;
+            	case 2:
+            		Consola.limpiarPantalla();
+            		String nombreEliminar = Consola.leerString("Ingrese nombre del producto a eliminar: ");
+            		try {
+            			almacen.eliminarProducto(nombreEliminar);
+            			System.out.println("Producto eliminado correctamente.");
+            		} 
+            		catch (ProductoNoEncontradoException e) {
+            			System.out.println("Error: " + e.getMessage());
+            		}
+            		Consola.enterParaContinuar();
+            		break;
 
                 case 3:
                 	Consola.limpiarPantalla();
@@ -146,12 +150,18 @@ public class Main {
                     break;
 
                 case 4:
-                	Consola.limpiarPantalla();
+                    Consola.limpiarPantalla();
                     String prodVenta = Consola.leerString("Ingrese nombre del producto a vender: ");
                     int cantidadVenta = Consola.leerEntero("Ingrese cantidad a vender: ");
-                    almacen.venderProducto(prodVenta, cantidadVenta);
+                    try {
+                        almacen.venderProducto(prodVenta, cantidadVenta);
+                    } 
+                    catch (ProductoNoEncontradoException | StockInsuficienteException e) {
+                        System.out.println("Error: " + e.getMessage());
+                    }
                     Consola.enterParaContinuar();
                     break;
+
 
                 case 5:
                 	Consola.limpiarPantalla();

@@ -5,6 +5,7 @@ import gestionInventario.utilidades.ExportadorExcel;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.List;
+import gestionInventario.excepciones.*;
 
 public class Inventario {
 	private HashMap<String,Secciones> secciones;
@@ -38,26 +39,17 @@ public class Inventario {
 		}
 	}
 	
-	public void eliminarProducto(String Nombre) {
-		for(Secciones s: secciones.values()) {
-			System.out.println("Buscando...");
-			Producto p=s.getProductos().get(Nombre);
-			if(p!=null) {
-				Consola.limpiarPantalla();
-				System.out.println("El producto se encontro en la seccion " + s.getNombre());
-				String respuesta= Consola.leerString("Desea eliminarlo? (si/no): ");
-				if(respuesta.equals("si")) {
-					if(s.getProductos().remove(Nombre, p)){
-						System.out.print("Eliminado con exito!!!");
-						return ;
-					}
-					System.out.print("La eliminacion fallo");
-					return ;
-				}
-			}
-		}
-		System.out.print("No se encontro el producto en sistema");
-		return;
+	public void eliminarProducto(String Nombre) throws ProductoNoEncontradoException {
+	    for(Secciones s: secciones.values()) {
+	        Producto p=s.getProductos().get(Nombre);
+	        if(p!=null) {
+	            if(s.getProductos().remove(Nombre,p)){
+	                System.out.println("Eliminado con exito!!!");
+	                return;
+	            }
+	        }
+	    }
+	    throw new ProductoNoEncontradoException("No se encontró el producto " + Nombre + " en el sistema.");
 	}
 	
 	public void agregarProducto(Producto productos) {
@@ -97,7 +89,7 @@ public class Inventario {
 	    seccion.comprarProducto(nombreProducto, cantidad, proveedor);
 	}
 
-	public void venderProducto(String nombreProducto, int cantidad) {
+	public void venderProducto(String nombreProducto, int cantidad) throws ProductoNoEncontradoException, StockInsuficienteException {
 	    System.out.println("¿A qué sección desea ingresar?");
 	    for (String key : secciones.keySet()) {
 	        System.out.println("- " + key);
@@ -105,8 +97,7 @@ public class Inventario {
 	    String seccionBuscada = Consola.leerString(null);
 	    Secciones seccion = secciones.get(seccionBuscada);
 	    if (seccion == null) {
-	        System.out.println("LA SECCIÓN BUSCADA NO EXISTE EN EL SISTEMA!!");
-	        return;
+	        throw new ProductoNoEncontradoException("La sección " + seccionBuscada + " no existe en el sistema.");
 	    }
 	    seccion.venderProducto(nombreProducto, cantidad);
 	}

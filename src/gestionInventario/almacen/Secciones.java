@@ -1,7 +1,7 @@
 package gestionInventario.almacen;
 
 import java.util.HashMap;
-
+import gestionInventario.excepciones.*;
 
 public class Secciones {
 	private String nombre;
@@ -26,13 +26,14 @@ public class Secciones {
 	    return this.productos;
 	}
 	
-	public void eliminarProducto(String nombre) {
+	public void eliminarProducto(String nombre) throws ProductoNoEncontradoException {
 	    if (productos.remove(nombre) == null) {
-	        System.out.println("No existe el producto para eliminar.");
+	        throw new ProductoNoEncontradoException("No existe el producto " + nombre + " para eliminar.");
 	    } else {
 	        System.out.println("Producto eliminado.");
 	    }
 	}
+
 	
 	public void agregarProducto(Producto producto) {
 		if(!productos.containsKey(producto.getNombre())){
@@ -53,18 +54,16 @@ public class Secciones {
 	    System.out.println("Compra realizada: " + cantidad + " unidades de " + nombreProducto);
 	}
 
-	public void venderProducto(String nombreProducto, int cantidad) {
+	public void venderProducto(String nombreProducto, int cantidad) throws ProductoNoEncontradoException, StockInsuficienteException {
 	    Producto producto = productos.get(nombreProducto);
 	    if (producto == null) {
-	        System.out.println("El producto " + nombreProducto + " no existe en la sección " + nombre);
-	        return;
+	        throw new ProductoNoEncontradoException("El producto " + nombreProducto + " no existe en la sección " + nombre);
 	    }
 	    if (cantidad > producto.getStock()) {
-	        System.out.println("No hay suficiente stock para vender " + cantidad + " unidades de " + nombreProducto);
-	    } else {
-	        producto.venta(cantidad);
-	        System.out.println("Venta realizada: " + cantidad + " unidades de " + nombreProducto);
+	        throw new StockInsuficienteException("No hay suficiente stock para vender " + cantidad + " unidades de " + nombreProducto);
 	    }
+	    producto.venta(cantidad);
+	    System.out.println("Venta realizada: " + cantidad + " unidades de " + nombreProducto);
 	}
 
 	public void informacionProducto(String nombre) {

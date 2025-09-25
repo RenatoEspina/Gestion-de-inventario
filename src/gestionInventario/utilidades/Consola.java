@@ -22,7 +22,8 @@ public class Consola {
             try {
                 if (mensaje != null) System.out.print(mensaje);
                 return Integer.parseInt(sc.nextLine().trim());
-            } catch (NumberFormatException e) {
+            } 
+            catch (NumberFormatException e) {
                 System.out.println("Error: Debes ingresar un número entero válido.");
             }
         }
@@ -34,7 +35,8 @@ public class Consola {
             try {
                 if (mensaje != null) System.out.print(mensaje);
                 return Integer.parseInt(sc.nextLine().trim());
-            } catch (NumberFormatException e) {
+            } 
+            catch (NumberFormatException e) {
                 System.out.println("Error: Debes ingresar un número entero válido.");
             }
         }
@@ -56,7 +58,8 @@ public class Consola {
             String input = sc.nextLine().trim();
             try {
                 return LocalDate.parse(input); // espera formato YYYY-MM-DD
-            } catch (DateTimeParseException e) {
+            } 
+            catch (DateTimeParseException e) {
                 System.out.println("Error: Debes ingresar una fecha válida en formato YYYY-MM-DD.");
             }
         }
