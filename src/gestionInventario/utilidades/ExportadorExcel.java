@@ -10,71 +10,115 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
- * Clase utilitaria para generar reportes en formato Excel.
- *
+ * Clase utilitaria para generar reportes en formato Excel (.xlsx) del inventario.
+ * Proporciona métodos para crear reportes filtrados por ventas y por proveedor.
+ * 
  * @author Renato Espina
- * @version 2.0 (Adaptación a JavaFX)
+ * @version 2.3
  */
 public class ExportadorExcel {
 
+	/**
+	 * Crea un nuevo exportador de datos a Excel.
+	 */
+	public ExportadorExcel() { }
+	
     /**
-     * Genera un archivo Excel con un reporte de una lista de productos.
-     *
-     * @param inventario El inventario completo, para buscar la sección de cada producto.
-     * @param productosFiltrados La lista de productos a incluir en el reporte.
-     * @param nombreArchivo El nombre del archivo a generar (ej. "Reporte_Ventas.xlsx").
-     * @throws IOException si ocurre un error durante la escritura del archivo.
+     * Genera un reporte de Excel con productos filtrados por ventas mínimas.
+     * El reporte incluye información detallada de cada producto y su sección correspondiente.
+     * 
+     * @param inventario El inventario del cual obtener los productos
+     * @param productosFiltrados Lista de productos filtrados por ventas
+     * @param nombreArchivo Ruta y nombre del archivo Excel a generar
+     * @throws IOException Si ocurre un error durante la escritura del archivo
      */
-    public static void generarReporte(Inventario inventario, List<Producto> productosFiltrados, String nombreArchivo) throws IOException {
+    public static void generarReporteVentas(Inventario inventario, List<Producto> productosFiltrados, String nombreArchivo) throws IOException {
         try (XSSFWorkbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Reporte Ventas");
+            CellStyle headerStyle = createHeaderStyle(workbook);
 
-            // Estilo y fuente para la cabecera
-            CellStyle headerStyle = workbook.createCellStyle();
-            Font font = workbook.createFont();
-            font.setBold(true);
-            headerStyle.setFont(font);
-
-            // Cabecera
             Row header = sheet.createRow(0);
-            header.createCell(0).setCellValue("Sección");
-            header.createCell(1).setCellValue("Producto");
-            header.createCell(2).setCellValue("Ventas");
-            header.forEach(cell -> cell.setCellStyle(headerStyle));
+            String[] titulos = {"Sección", "Producto", "Stock", "Compras Totales", "Ventas Totales"};
+            for (int i = 0; i < titulos.length; i++) {
+                Cell cell = header.createCell(i);
+                cell.setCellValue(titulos[i]);
+                cell.setCellStyle(headerStyle);
+            }
 
             int rowIndex = 1;
-            int totalVentas = 0;
-
-            // Llenar datos
-            for (Producto p : productosFiltrados) {
-                Secciones seccion = inventario.encontrarSeccionDeProducto(p);
-                String nombreSeccion = (seccion != null) ? seccion.getNombre() : "No encontrada";
+            for (Producto producto : productosFiltrados) {
+                Secciones seccion = inventario.encontrarSeccionDeProducto(producto.getNombre());
+                String nombreSeccion = (seccion != null) ? seccion.getNombre() : "N/A";
 
                 Row row = sheet.createRow(rowIndex++);
                 row.createCell(0).setCellValue(nombreSeccion);
-                row.createCell(1).setCellValue(p.getNombre());
-                row.createCell(2).setCellValue(p.getVentasTotales());
-                totalVentas += p.getVentasTotales();
+                row.createCell(1).setCellValue(producto.getNombre());
+                row.createCell(2).setCellValue(producto.getStock());
+                row.createCell(3).setCellValue(producto.getComprasTotales());
+                row.createCell(4).setCellValue(producto.getVentasTotales());
             }
 
-            // Fila de Total general
-            Row totalRow = sheet.createRow(rowIndex);
-            totalRow.createCell(1).setCellValue("TOTAL GENERAL");
-            totalRow.createCell(2).setCellValue(totalVentas);
-            CellStyle boldStyle = workbook.createCellStyle();
-            boldStyle.setFont(font);
-            totalRow.getCell(1).setCellStyle(boldStyle);
-            totalRow.getCell(2).setCellStyle(boldStyle);
+            for (int i = 0; i < titulos.length; i++) {
+                sheet.autoSizeColumn(i);
+            }
 
-            // Ajustar ancho de columnas
-            sheet.autoSizeColumn(0);
-            sheet.autoSizeColumn(1);
-            sheet.autoSizeColumn(2);
-
-            // Guardar archivo
             try (FileOutputStream fileOut = new FileOutputStream(nombreArchivo)) {
                 workbook.write(fileOut);
             }
         }
+    }
+
+    /**
+     * Genera un reporte de Excel con productos filtrados por proveedor.
+     * El reporte incluye información básica de cada producto.
+     * 
+     * @param productosFiltrados Lista de productos filtrados por proveedor
+     * @param nombreArchivo Ruta y nombre del archivo Excel a generar
+     * @throws IOException Si ocurre un error durante la escritura del archivo
+     */
+    public static void generarReporteProveedor(List<Producto> productosFiltrados, String nombreArchivo) throws IOException {
+        try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet("Reporte Proveedor");
+            CellStyle headerStyle = createHeaderStyle(workbook);
+
+            Row header = sheet.createRow(0);
+            String[] titulos = {"Producto", "Stock", "Compras Totales", "Ventas Totales"};
+            for (int i = 0; i < titulos.length; i++) {
+                Cell cell = header.createCell(i);
+                cell.setCellValue(titulos[i]);
+                cell.setCellStyle(headerStyle);
+            }
+            
+            int rowIndex = 1;
+            for (Producto producto : productosFiltrados) {
+                Row row = sheet.createRow(rowIndex++);
+                row.createCell(0).setCellValue(producto.getNombre());
+                row.createCell(1).setCellValue(producto.getStock());
+                row.createCell(2).setCellValue(producto.getComprasTotales());
+                row.createCell(3).setCellValue(producto.getVentasTotales());
+            }
+
+            for (int i = 0; i < titulos.length; i++) {
+                sheet.autoSizeColumn(i);
+            }
+
+            try (FileOutputStream fileOut = new FileOutputStream(nombreArchivo)) {
+                workbook.write(fileOut);
+            }
+        }
+    }
+
+    /**
+     * Crea y configura el estilo para las celdas de encabezado en el archivo Excel.
+     * 
+     * @param workbook El libro de trabajo de Excel
+     * @return CellStyle configurado para encabezados con texto en negrita
+     */
+    private static CellStyle createHeaderStyle(Workbook workbook) {
+        CellStyle headerStyle = workbook.createCellStyle();
+        Font font = workbook.createFont();
+        font.setBold(true);
+        headerStyle.setFont(font);
+        return headerStyle;
     }
 }

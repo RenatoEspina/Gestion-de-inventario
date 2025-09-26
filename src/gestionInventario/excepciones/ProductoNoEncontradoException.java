@@ -17,7 +17,8 @@ package gestionInventario.excepciones;
  * @see StockInsuficienteException
  */
 public class ProductoNoEncontradoException extends Exception {
-    private static final long serialVersionUID = 1L;
+	// Identificador único para el control de versiones durante la serialización.
+	private static final long serialVersionUID = 1L;
 
     /**
      * Constructor que crea una nueva excepción con un mensaje específico.

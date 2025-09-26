@@ -16,7 +16,8 @@ import java.time.LocalDate;
  * @see Producto
  */
 public class ProductoPerecible extends Producto {
-    private LocalDate fechaVencimiento;
+	/** La fecha de vencimiento específica para este producto perecible. */
+	private LocalDate fechaVencimiento;
 
     /**
      * Constructor para crear un nuevo producto perecible.

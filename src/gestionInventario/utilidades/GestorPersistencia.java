@@ -10,23 +10,22 @@ import java.util.List;
 
 /**
  * Clase responsable de la persistencia de datos del sistema de inventario.
- * <p>
- * Guarda y carga el estado completo del inventario desde archivos CSV. Maneja los
- * errores lanzando excepciones que pueden ser capturadas por la interfaz de usuario.
- * </p>
- *
+ * Guarda y carga el estado completo del inventario desde archivos CSV.
+ * 
  * @author Renato Espina
  * @version 2.0 (Adaptación a JavaFX)
  */
 public class GestorPersistencia {
+	/** ruta donde se guardan las secciones. */
     private final String rutaSecciones;
+    /** ruta donde se guardan los productos. */
     private final String rutaProductos;
 
     /**
      * Constructor que inicializa el gestor de persistencia.
      *
-     * @param rutaBase La ruta del directorio donde se almacenarán los archivos.
-     * @throws IOException si no se pueden crear los directorios o archivos iniciales.
+     * @param rutaBase La ruta del directorio donde se almacenarán los archivos
+     * @throws IOException si no se pueden crear los directorios o archivos iniciales
      */
     public GestorPersistencia(String rutaBase) throws IOException {
         this.rutaSecciones = rutaBase + "secciones.csv";
@@ -41,6 +40,13 @@ public class GestorPersistencia {
         crearArchivoSiNoExiste(rutaProductos, "seccion,nombre,proveedores,compras_totales,ventas_totales,fecha_vencimiento,stock_maximo\n");
     }
 
+    /**
+     * Crea un archivo con el encabezado especificado si no existe.
+     *
+     * @param rutaArchivo Ruta del archivo a crear
+     * @param encabezado Encabezado a escribir en el archivo
+     * @throws IOException Si ocurre un error al crear o escribir en el archivo
+     */
     private void crearArchivoSiNoExiste(String rutaArchivo, String encabezado) throws IOException {
         File archivo = new File(rutaArchivo);
         if (!archivo.exists()) {
@@ -50,13 +56,23 @@ public class GestorPersistencia {
         }
     }
 
-    // --- GUARDAR INVENTARIO ---
-
+    /**
+     * Guarda el estado completo del inventario en archivos CSV.
+     *
+     * @param inventario El inventario a guardar
+     * @throws IOException Si ocurre un error durante la escritura de los archivos
+     */
     public void guardarInventario(Inventario inventario) throws IOException {
         guardarSecciones(inventario);
         guardarProductos(inventario);
     }
 
+    /**
+     * Guarda las secciones del inventario en el archivo CSV correspondiente.
+     *
+     * @param inventario El inventario con las secciones a guardar
+     * @throws IOException Si ocurre un error durante la escritura del archivo
+     */
     private void guardarSecciones(Inventario inventario) throws IOException {
         try (FileWriter writer = new FileWriter(rutaSecciones)) {
             writer.write("nombre_seccion\n");
@@ -66,6 +82,12 @@ public class GestorPersistencia {
         }
     }
 
+    /**
+     * Guarda los productos de todas las secciones en el archivo CSV correspondiente.
+     *
+     * @param inventario El inventario con los productos a guardar
+     * @throws IOException Si ocurre un error durante la escritura del archivo
+     */
     private void guardarProductos(Inventario inventario) throws IOException {
         try (FileWriter writer = new FileWriter(rutaProductos)) {
             writer.write("seccion,nombre,proveedores,compras_totales,ventas_totales,fecha_vencimiento,stock_maximo\n");
@@ -73,12 +95,14 @@ public class GestorPersistencia {
                 for (Producto producto : seccion.getProductos().values()) {
                     String fechaVencimiento = "";
                     String stockMaximo = "";
+                    
                     if (producto instanceof ProductoPerecible) {
                         fechaVencimiento = ((ProductoPerecible) producto).getFechaVencimiento().toString();
                     }
                     if (producto instanceof ProductoPremium) {
                         stockMaximo = String.valueOf(((ProductoPremium) producto).getStockMaximo());
                     }
+                    
                     String linea = String.format("%s,%s,%s,%d,%d,%s,%s\n",
                         escapeCSV(seccion.getNombre()),
                         escapeCSV(producto.getNombre()),
@@ -93,8 +117,12 @@ public class GestorPersistencia {
         }
     }
 
-    // --- CARGAR INVENTARIO ---
-
+    /**
+     * Carga el inventario completo desde los archivos CSV.
+     *
+     * @return Inventario cargado con todas las secciones y productos
+     * @throws IOException Si ocurre un error durante la lectura de los archivos
+     */
     public Inventario cargarInventario() throws IOException {
         Inventario inventario = new Inventario();
         cargarSecciones(inventario);
@@ -102,11 +130,16 @@ public class GestorPersistencia {
         return inventario;
     }
 
+    /**
+     * Carga las secciones desde el archivo CSV correspondiente.
+     *
+     * @param inventario El inventario donde se cargarán las secciones
+     * @throws IOException Si ocurre un error durante la lectura del archivo
+     */
     private void cargarSecciones(Inventario inventario) throws IOException {
         LectorCSV lector = new LectorCSV(rutaSecciones);
         List<List<String>> datos = lector.readAll();
         
-        // Empezar a leer desde la segunda línea si hay encabezado
         int inicio = (datos.isEmpty() || datos.get(0).isEmpty() || !"nombre_seccion".equals(datos.get(0).get(0))) ? 0 : 1;
         
         for (int i = inicio; i < datos.size(); i++) {
@@ -117,6 +150,12 @@ public class GestorPersistencia {
         }
     }
 
+    /**
+     * Carga los productos desde el archivo CSV correspondiente.
+     *
+     * @param inventario El inventario donde se cargarán los productos
+     * @throws IOException Si ocurre un error durante la lectura del archivo o procesamiento de datos
+     */
     private void cargarProductos(Inventario inventario) throws IOException {
         LectorCSV lector = new LectorCSV(rutaProductos);
         List<List<String>> datos = lector.readAll();
@@ -154,15 +193,18 @@ public class GestorPersistencia {
                     inventario.agregarProducto(seccion, producto);
 
                 } catch (Exception e) {
-                    // Si una línea está corrupta, podemos lanzar una excepción o simplemente ignorarla.
-                    // Lanzar una excepción es más seguro para notificar al usuario.
                     throw new IOException("Error al procesar la línea " + (i + 1) + " del archivo de productos: " + e.getMessage(), e);
                 }
             }
         }
     }
 
-    // --- Métodos auxiliares CSV ---
+    /**
+     * Escapa una cadena para formato CSV, añadiendo comillas si contiene caracteres especiales.
+     *
+     * @param value Cadena a escapar
+     * @return Cadena escapada para CSV
+     */
     private String escapeCSV(String value) {
         if (value.contains(",") || value.contains("\"") || value.contains("\n")) {
             return "\"" + value.replace("\"", "\"\"") + "\"";
@@ -170,6 +212,12 @@ public class GestorPersistencia {
         return value;
     }
     
+    /**
+     * Remueve el escape de una cadena en formato CSV.
+     *
+     * @param value Cadena escapada en CSV
+     * @return Cadena original sin escape
+     */
     private String unescapeCSV(String value) {
         if (value.startsWith("\"") && value.endsWith("\"")) {
             value = value.substring(1, value.length() - 1);

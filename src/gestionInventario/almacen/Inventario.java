@@ -21,6 +21,7 @@ import javafx.collections.ObservableList;
  * @see Producto
  */
 public class Inventario {
+	/** un mapa donde se guardan secciones. */
     private HashMap<String, Secciones> secciones;
 
     /**
@@ -141,5 +142,96 @@ public class Inventario {
             }
         }
         return null;
+    }
+    
+    /**
+     * Renombra una sección existente en el inventario.
+     *
+     * @param nombreActual El nombre actual de la sección a renombrar.
+     * @param nombreNuevo El nuevo nombre para la sección.
+     * @return true si el renombrado fue exitoso, false si el nuevo nombre ya existe o la sección actual no se encuentra.
+     */
+    public boolean renombrarSeccion(String nombreActual, String nombreNuevo) {
+        // Validar que el nuevo nombre no esté vacío y no exista ya
+        if (nombreNuevo == null || nombreNuevo.trim().isEmpty() || secciones.containsKey(nombreNuevo)) {
+            return false;
+        }
+
+        // Buscar y obtener la sección con el nombre actual
+        Secciones seccion = secciones.get(nombreActual);
+        if (seccion != null) {
+            // Eliminar la entrada antigua del mapa
+            secciones.remove(nombreActual);
+            
+            // Actualizar el nombre dentro del objeto sección
+            seccion.setNombre(nombreNuevo);
+            
+            // Volver a insertar la sección en el mapa con la nueva clave (el nuevo nombre)
+            secciones.put(nombreNuevo, seccion);
+            
+            return true; // Éxito
+        }
+
+        return false; // La sección original no fue encontrada
+    }
+    
+ // Archivo: gestionInventario/almacen/Inventario.java
+
+    /**
+     * Devuelve una lista observable con todos los productos de todas las secciones.
+     * Es ideal para vistas consolidadas en JavaFX.
+     *
+     * @return Una ObservableList que contiene todos los productos del inventario.
+     */
+    public ObservableList<Producto> getAllProductosAsObservableList() {
+        ObservableList<Producto> todosLosProductos = FXCollections.observableArrayList();
+        for (Secciones s : secciones.values()) {
+            todosLosProductos.addAll(s.getProductos().values());
+        }
+        return todosLosProductos;
+    }
+    
+    /**
+     * Busca y devuelve la sección a la que pertenece un producto por su nombre.
+     *
+     * @param nombreProducto El nombre del producto a buscar.
+     * @return La sección que contiene el producto, o null si no se encuentra.
+     */
+    public Secciones encontrarSeccionDeProducto(String nombreProducto) {
+        if (nombreProducto == null) return null;
+        for (Secciones s : secciones.values()) {
+            if (s.getProductos().containsKey(nombreProducto)) {
+                return s;
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Filtra la lista de todos los productos para encontrar aquellos que coincidan con un proveedor.
+     * La búsqueda no es sensible a mayúsculas/minúsculas y busca coincidencias parciales.
+     *
+     * @param proveedor El nombre o parte del nombre del proveedor a buscar.
+     * @return Una lista de productos que tienen al menos un proveedor que coincide con la búsqueda.
+     */
+    public List<Producto> filtrarProductosPorProveedor(String proveedor) {
+        List<Producto> productosFiltrados = new ArrayList<>();
+        // Preparamos el término de búsqueda para que no sea sensible a mayúsculas o espacios.
+        String proveedorLowerCase = proveedor.trim().toLowerCase();
+        if (proveedorLowerCase.isEmpty()) {
+            return productosFiltrados; // Devolvemos lista vacía si la búsqueda es vacía.
+        }
+
+        // Usamos el método que ya teníamos para obtener todos los productos.
+        for (Producto p : getAllProductosAsObservableList()) {
+            // Recorremos la lista de proveedores de cada producto.
+            for (String prov : p.getProveedores()) {
+                if (prov.toLowerCase().contains(proveedorLowerCase)) {
+                    productosFiltrados.add(p);
+                    break; // Una vez encontrado, pasamos al siguiente producto.
+                }
+            }
+        }
+        return productosFiltrados;
     }
 }

@@ -9,6 +9,7 @@ import gestionInventario.excepciones.ProductoNoEncontradoException;
 import gestionInventario.excepciones.SeccionNoEncontradaException;
 import gestionInventario.utilidades.ExportadorExcel;
 import gestionInventario.utilidades.GestorPersistencia;
+import gestionInventario.utilidades.ExportadorTXT;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,27 +28,51 @@ import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 
 /**
  * Clase principal que inicia y controla la aplicación de gestión de inventario con interfaz gráfica JavaFX.
- *
+ * Proporciona una interfaz completa para gestionar secciones, productos y generar reportes.
+ * 
  * @author Renato Espina
  * @version 2.3 (Lógica de UI Completa)
  */
 public class Main extends Application {
+	
 
-    private Inventario almacen;
-    private GestorPersistencia gestor;
-    private Stage primaryStage;
-    private Button btnSalir;
+    /** Constructor por defecto de la aplicación. */
+    public Main() {}
 
+	/** La instancia principal del inventario que contiene toda la lógica de negocio y los datos. */
+	private Inventario almacen;
+
+	/** El manejador de persistencia para cargar y guardar el estado del inventario. */
+	private GestorPersistencia gestor;
+
+	/** La ventana principal (Stage) de la aplicación JavaFX. */
+	private Stage primaryStage;
+
+	/** El botón de la interfaz para salir y guardar el inventario. */
+	private Button btnSalir;
+
+    /**
+     * Método principal que inicia la aplicación JavaFX.
+     * 
+     * @param args Argumentos de línea de comandos
+     */
     public static void main(String[] args) {
         launch(args);
     }
 
+    /**
+     * Método de inicio de la aplicación JavaFX.
+     * Configura la ventana principal, carga el inventario y muestra la interfaz.
+     * 
+     * @param primaryStage El escenario principal de la aplicación
+     */
     @Override
     public void start(Stage primaryStage) {
-        // ... El método start() y el menú principal no cambian ...
         this.primaryStage = primaryStage;
 
         try {
@@ -74,8 +99,12 @@ public class Main extends Application {
         primaryStage.show();
     }
 
+    /**
+     * Crea y configura el menú principal de la aplicación.
+     * 
+     * @return VBox con los elementos del menú principal
+     */
     private VBox crearMenuPrincipal() {
-        // ... Sin cambios ...
         Label titleLabel = new Label("Sistema de Inventario");
         titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #333;");
 
@@ -106,23 +135,21 @@ public class Main extends Application {
      */
     private void salirYGuardar() {
         try {
-            // Llama al gestor de persistencia para guardar el estado actual del inventario
             gestor.guardarInventario(almacen);
             mostrarAlerta(Alert.AlertType.INFORMATION, "Guardado", "Inventario guardado con éxito.", "¡Hasta luego!");
         } catch (IOException e) {
-            // Si algo sale mal, muestra una alerta de error
             mostrarAlerta(Alert.AlertType.ERROR, "Error al Guardar", "No se pudo guardar el inventario.", e.getMessage());
         }
-        // Cierra la ventana principal y finaliza la aplicación
         primaryStage.close();
     }
     
     /**
      * Muestra un diálogo de alerta genérico.
+     * 
      * @param tipo El tipo de alerta (ERROR, INFORMATION, WARNING, etc.)
-     * @param titulo El título de la ventana de alerta.
-     * @param encabezado El texto principal de la alerta.
-     * @param contenido Un texto descriptivo opcional.
+     * @param titulo El título de la ventana de alerta
+     * @param encabezado El texto principal de la alerta
+     * @param contenido Un texto descriptivo opcional
      */
     private void mostrarAlerta(Alert.AlertType tipo, String titulo, String encabezado, String contenido) {
         Alert alerta = new Alert(tipo);
@@ -136,47 +163,38 @@ public class Main extends Application {
     
     /**
      * Abre una nueva ventana modal para gestionar las secciones del inventario.
-     * Permite agregar y eliminar secciones.
+     * Permite agregar, renombrar y eliminar secciones.
      */
     private void abrirVentanaSecciones() {
-        // Crea la nueva ventana (Stage)
         Stage ventana = new Stage();
-        ventana.initModality(Modality.APPLICATION_MODAL); // Bloquea la ventana principal
+        ventana.initModality(Modality.APPLICATION_MODAL);
         ventana.setTitle("Gestionar Secciones");
         ventana.setMinWidth(400);
 
-        // Layout principal
         BorderPane layout = new BorderPane();
         layout.setPadding(new Insets(20));
 
-        // Título
         Label titulo = new Label("Secciones del Almacén");
         titulo.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
         layout.setTop(titulo);
         BorderPane.setAlignment(titulo, Pos.CENTER);
 
-        // Lista para mostrar las secciones
         ListView<Secciones> listaSecciones = new ListView<>();
-        // Carga las secciones desde el inventario usando la lista observable
         listaSecciones.setItems(almacen.getSeccionesAsObservableList());
         layout.setCenter(listaSecciones);
         BorderPane.setMargin(listaSecciones, new Insets(15, 0, 15, 0));
 
-
-        // Botones de acción
         Button btnAgregar = new Button("Agregar Sección");
+        Button btnRenombrar = new Button("Renombrar Sección");
         Button btnEliminar = new Button("Eliminar Sección");
         btnAgregar.setMaxWidth(Double.MAX_VALUE);
+        btnRenombrar.setMaxWidth(Double.MAX_VALUE);
         btnEliminar.setMaxWidth(Double.MAX_VALUE);
         
-        // Layout para los botones
-        HBox botonesLayout = new HBox(10, btnAgregar, btnEliminar);
+        HBox botonesLayout = new HBox(10, btnAgregar, btnRenombrar, btnEliminar);
         botonesLayout.setAlignment(Pos.CENTER);
         layout.setBottom(botonesLayout);
 
-        // --- Lógica de los botones ---
-
-        // Lógica para agregar una sección
         btnAgregar.setOnAction(e -> {
             TextInputDialog dialogo = new TextInputDialog();
             dialogo.setTitle("Nueva Sección");
@@ -188,7 +206,6 @@ public class Main extends Application {
                 if (nombre.trim().isEmpty()) {
                     mostrarAlerta(Alert.AlertType.WARNING, "Inválido", "El nombre de la sección no puede estar vacío.", null);
                 } else if (almacen.nuevaSeccion(nombre)) {
-                    listaSecciones.setItems(almacen.getSeccionesAsObservableList()); // Refresca la lista
                     listaSecciones.refresh();
                     mostrarAlerta(Alert.AlertType.INFORMATION, "Éxito", "Sección '" + nombre + "' creada correctamente.", null);
                 } else {
@@ -197,7 +214,37 @@ public class Main extends Application {
             });
         });
 
-        // Lógica para eliminar una sección
+        btnRenombrar.setOnAction(e -> {
+            Secciones seccionSeleccionada = listaSecciones.getSelectionModel().getSelectedItem();
+            if (seccionSeleccionada == null) {
+                mostrarAlerta(Alert.AlertType.WARNING, "Acción no válida", "Debe seleccionar una sección de la lista para renombrar.", null);
+                return;
+            }
+
+            TextInputDialog dialogo = new TextInputDialog(seccionSeleccionada.getNombre());
+            dialogo.setTitle("Renombrar Sección");
+            dialogo.setHeaderText("Ingrese el nuevo nombre para la sección '" + seccionSeleccionada.getNombre() + "':");
+            dialogo.setContentText("Nuevo nombre:");
+
+            Optional<String> resultado = dialogo.showAndWait();
+            resultado.ifPresent(nuevoNombre -> {
+                if (nuevoNombre.trim().isEmpty()) {
+                    mostrarAlerta(Alert.AlertType.WARNING, "Inválido", "El nombre no puede estar vacío.", null);
+                    return;
+                }
+                if (nuevoNombre.equals(seccionSeleccionada.getNombre())) {
+                    return;
+                }
+
+                if (almacen.renombrarSeccion(seccionSeleccionada.getNombre(), nuevoNombre)) {
+                    listaSecciones.refresh();
+                    mostrarAlerta(Alert.AlertType.INFORMATION, "Éxito", "Sección renombrada correctamente.", null);
+                } else {
+                    mostrarAlerta(Alert.AlertType.ERROR, "Error", "No se pudo renombrar la sección. El nuevo nombre '" + nuevoNombre + "' podría ya existir.", null);
+                }
+            });
+        });
+
         btnEliminar.setOnAction(e -> {
             Secciones seccionSeleccionada = listaSecciones.getSelectionModel().getSelectedItem();
             if (seccionSeleccionada == null) {
@@ -212,21 +259,21 @@ public class Main extends Application {
             confirmacion.showAndWait().ifPresent(response -> {
                 if (response == ButtonType.YES) {
                     almacen.eliminarSeccion(seccionSeleccionada.getNombre());
-                    listaSecciones.setItems(almacen.getSeccionesAsObservableList()); // Refresca la lista
                     listaSecciones.refresh();
                     mostrarAlerta(Alert.AlertType.INFORMATION, "Éxito", "Sección eliminada.", null);
                 }
             });
         });
 
-        // Configurar y mostrar la ventana
         Scene escena = new Scene(layout, 450, 500);
         ventana.setScene(escena);
-        ventana.showAndWait(); // Muestra la ventana y espera a que se cierre
+        ventana.showAndWait();
     }
 
-    // --- GESTIÓN DE PRODUCTOS (MÉTODO PRINCIPAL) ---
-
+    /**
+     * Abre una nueva ventana modal para gestionar los productos del inventario.
+     * Permite agregar, eliminar, comprar y vender productos, así como generar reportes.
+     */
     private void abrirVentanaProductos() {
         Stage ventana = new Stage();
         ventana.initModality(Modality.APPLICATION_MODAL);
@@ -237,22 +284,74 @@ public class Main extends Application {
 
         HBox topLayout = new HBox(10);
         topLayout.setAlignment(Pos.CENTER_LEFT);
-        Label lblSeccion = new Label("Seleccionar Sección:");
-        ComboBox<Secciones> comboSecciones = new ComboBox<>(almacen.getSeccionesAsObservableList());
-        topLayout.getChildren().addAll(lblSeccion, comboSecciones);
+        
+        Label lblSeccion = new Label("Filtrar Sección:");
+
+        ObservableList<Secciones> listaDeSecciones = almacen.getSeccionesAsObservableList();
+        listaDeSecciones.add(0, null);
+
+        ComboBox<Secciones> comboSecciones = new ComboBox<>(listaDeSecciones);
+
+        comboSecciones.setCellFactory(param -> new ListCell<Secciones>() {
+            @Override
+            protected void updateItem(Secciones item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText("Todas las secciones");
+                } else {
+                    setText(item.getNombre());
+                }
+            }
+        });
+
+        comboSecciones.setButtonCell(new ListCell<Secciones>() {
+            @Override
+            protected void updateItem(Secciones item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText("Todas las secciones");
+                } else {
+                    setText(item.getNombre());
+                }
+            }
+        });
+
+        comboSecciones.getSelectionModel().selectFirst();
+
+        TextField buscador = new TextField();
+        buscador.setPromptText("Buscar por nombre...");
+        HBox.setHgrow(buscador, Priority.ALWAYS);
+
+        topLayout.getChildren().addAll(lblSeccion, comboSecciones, buscador);
         layout.setTop(topLayout);
         BorderPane.setMargin(topLayout, new Insets(0, 0, 15, 0));
 
         TableView<Producto> tablaProductos = new TableView<>();
         configurarTablaProductos(tablaProductos);
         layout.setCenter(tablaProductos);
-        
+
+        ObservableList<Producto> listaMaestra = FXCollections.observableArrayList();
+        FilteredList<Producto> listaFiltrada = new FilteredList<>(listaMaestra, p -> true);
+        tablaProductos.setItems(listaFiltrada);
+
         comboSecciones.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null) {
-                tablaProductos.setItems(newVal.getProductosAsObservableList());
+                listaMaestra.setAll(newVal.getProductosAsObservableList());
             } else {
-                tablaProductos.setItems(FXCollections.observableArrayList());
+                listaMaestra.setAll(almacen.getAllProductosAsObservableList());
             }
+        });
+        
+        listaMaestra.setAll(almacen.getAllProductosAsObservableList());
+
+        buscador.textProperty().addListener((obs, oldVal, newVal) -> {
+            listaFiltrada.setPredicate(producto -> {
+                if (newVal == null || newVal.isEmpty()) {
+                    return true;
+                }
+                String filtroEnMinusculas = newVal.toLowerCase();
+                return producto.getNombre().toLowerCase().contains(filtroEnMinusculas);
+            });
         });
 
         VBox botonesLayout = new VBox(10);
@@ -261,55 +360,86 @@ public class Main extends Application {
         Button btnEliminar = new Button("Eliminar Producto");
         Button btnComprar = new Button("Comprar Stock...");
         Button btnVender = new Button("Vender Stock...");
-        Button btnReporte = new Button("Generar Reporte...");
-        
-        // ... (configuración de tamaño de botones)
+        Button btnReporte = new Button("Opciones de filtro...");
+        Button btnReporteTXT = new Button("Generar Reporte TXT");
+
         btnAgregar.setMaxWidth(Double.MAX_VALUE);
         btnEliminar.setMaxWidth(Double.MAX_VALUE);
         btnComprar.setMaxWidth(Double.MAX_VALUE);
         btnVender.setMaxWidth(Double.MAX_VALUE);
         btnReporte.setMaxWidth(Double.MAX_VALUE);
+        btnReporteTXT.setMaxWidth(Double.MAX_VALUE);
         
-        botonesLayout.getChildren().addAll(btnAgregar, btnEliminar, new Separator(), btnComprar, btnVender, new Separator(), btnReporte);
+        botonesLayout.getChildren().addAll(btnAgregar, btnEliminar, new Separator(), btnComprar, btnVender, new Separator(), btnReporte, btnReporteTXT);
         layout.setRight(botonesLayout);
         
-        // --- LÓGICA DE EVENTOS PARA BOTONES ---
         btnAgregar.setOnAction(e -> logicaAgregarProducto(comboSecciones.getValue(), tablaProductos));
         btnEliminar.setOnAction(e -> logicaEliminarProducto(tablaProductos.getSelectionModel().getSelectedItem(), tablaProductos));
-        btnComprar.setOnAction(e -> logicaComprarProducto(comboSecciones.getValue(), tablaProductos.getSelectionModel().getSelectedItem(), tablaProductos));
-        btnVender.setOnAction(e -> logicaVenderProducto(comboSecciones.getValue(), tablaProductos.getSelectionModel().getSelectedItem(), tablaProductos));
-        btnReporte.setOnAction(e -> logicaGenerarReporte());
+        btnComprar.setOnAction(e -> logicaComprarProducto(tablaProductos.getSelectionModel().getSelectedItem(), tablaProductos));
+        btnVender.setOnAction(e -> logicaVenderProducto(tablaProductos.getSelectionModel().getSelectedItem(), tablaProductos));
+        btnReporte.setOnAction(e -> logicaOpcionesReporte());
+        btnReporteTXT.setOnAction(e -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Guardar Reporte de Inventario Completo");
+            fileChooser.setInitialFileName("Reporte_Inventario_" + LocalDate.now() + ".txt");
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Archivos de Texto", "*.txt"));
+
+            File archivo = fileChooser.showSaveDialog(primaryStage);
+            if (archivo != null) {
+                try {
+                    ExportadorTXT.generarReporteCompleto(almacen, archivo.getAbsolutePath());
+                    mostrarAlerta(Alert.AlertType.INFORMATION, "Éxito", "Reporte TXT generado y guardado en:\n" + archivo.getAbsolutePath(), null);
+                } catch (IOException ioe) {
+                    mostrarAlerta(Alert.AlertType.ERROR, "Error al Guardar", "No se pudo guardar el archivo de texto.", ioe.getMessage());
+                }
+            }
+        });
 
         Scene escena = new Scene(layout, 900, 600);
         ventana.setScene(escena);
         ventana.showAndWait();
     }
     
+    /**
+     * Configura las columnas de la tabla de productos.
+     * 
+     * @param tabla La tabla de productos a configurar
+     */
     @SuppressWarnings("unchecked")
-    private void configurarTablaProductos(TableView<Producto> tabla){
-        // ... Sin cambios ...
+    private void configurarTablaProductos(TableView<Producto> tabla) {
         TableColumn<Producto, String> colNombre = new TableColumn<>("Nombre");
         colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
-        colNombre.setPrefWidth(200);
+        colNombre.setPrefWidth(180);
 
         TableColumn<Producto, Integer> colStock = new TableColumn<>("Stock");
         colStock.setCellValueFactory(new PropertyValueFactory<>("stock"));
+        colStock.setPrefWidth(70);
 
         TableColumn<Producto, Integer> colCompras = new TableColumn<>("Compras Totales");
         colCompras.setCellValueFactory(new PropertyValueFactory<>("comprasTotales"));
+        colCompras.setPrefWidth(120);
 
         TableColumn<Producto, Integer> colVentas = new TableColumn<>("Ventas Totales");
         colVentas.setCellValueFactory(new PropertyValueFactory<>("ventasTotales"));
+        colVentas.setPrefWidth(120);
 
-        tabla.getColumns().addAll(colNombre, colStock, colCompras, colVentas);
-        tabla.setPlaceholder(new Label("Seleccione una sección para ver sus productos"));
+        TableColumn<Producto, String> colProveedores = new TableColumn<>("Proveedores");
+        colProveedores.setCellValueFactory(cellData -> {
+            String listaProveedores = String.join(", ", cellData.getValue().getProveedores());
+            return new javafx.beans.property.SimpleStringProperty(listaProveedores);
+        });
+        colProveedores.setPrefWidth(200);
+
+        tabla.getColumns().addAll(colNombre, colStock, colCompras, colVentas, colProveedores);
+        tabla.setPlaceholder(new Label("No hay productos que mostrar o no se ha seleccionado una sección"));
     }
-
-    // --- MÉTODOS AUXILIARES PARA LÓGICA DE BOTONES DE PRODUCTOS ---
 
     /**
      * Maneja la lógica para el botón "Agregar Producto".
      * Muestra un diálogo personalizado para crear un nuevo producto y lo añade a la sección seleccionada.
+     * 
+     * @param seccionSeleccionada La sección donde se agregará el producto
+     * @param tabla La tabla de productos que se actualizará
      */
     private void logicaAgregarProducto(Secciones seccionSeleccionada, TableView<Producto> tabla) {
         if (seccionSeleccionada == null) {
@@ -317,7 +447,6 @@ public class Main extends Application {
             return;
         }
 
-        // Crear y mostrar el diálogo personalizado
         DialogoProducto dialogo = new DialogoProducto();
         Optional<Producto> resultado = dialogo.mostrarDialogo();
 
@@ -339,6 +468,9 @@ public class Main extends Application {
     /**
      * Maneja la lógica para el botón "Eliminar Producto".
      * Pide confirmación y elimina el producto seleccionado.
+     * 
+     * @param productoSeleccionado El producto a eliminar
+     * @param tabla La tabla de productos que se actualizará
      */
     private void logicaEliminarProducto(Producto productoSeleccionado, TableView<Producto> tabla) {
         if (productoSeleccionado == null) {
@@ -354,7 +486,7 @@ public class Main extends Application {
             if (response == ButtonType.YES) {
                 try {
                     almacen.eliminarProducto(productoSeleccionado.getNombre());
-                    tabla.getItems().remove(productoSeleccionado); // Más eficiente que recargar todo
+                    tabla.getItems().remove(productoSeleccionado);
                     tabla.refresh();
                     mostrarAlerta(Alert.AlertType.INFORMATION, "Éxito", "Producto eliminado.", null);
                 } catch (ProductoNoEncontradoException e) {
@@ -367,10 +499,19 @@ public class Main extends Application {
     /**
      * Maneja la lógica para el botón "Comprar Stock".
      * Pide cantidad y proveedor, y actualiza el stock del producto.
+     * 
+     * @param producto El producto al que se le comprará stock
+     * @param tabla La tabla de productos que se actualizará
      */
-    private void logicaComprarProducto(Secciones seccion, Producto producto, TableView<Producto> tabla) {
-        if (producto == null || seccion == null) {
-            mostrarAlerta(Alert.AlertType.WARNING, "Acción no válida", "Debe seleccionar una sección y un producto.", null);
+    private void logicaComprarProducto(Producto producto, TableView<Producto> tabla) {
+        if (producto == null) {
+            mostrarAlerta(Alert.AlertType.WARNING, "Acción no válida", "Debe seleccionar un producto.", null);
+            return;
+        }
+        
+        Secciones seccion = almacen.encontrarSeccionDeProducto(producto.getNombre());
+        if (seccion == null) {
+            mostrarAlerta(Alert.AlertType.ERROR, "Error Crítico", "No se pudo encontrar la sección para este producto.", null);
             return;
         }
 
@@ -387,8 +528,7 @@ public class Main extends Application {
                     mostrarAlerta(Alert.AlertType.WARNING, "Dato inválido", "La cantidad debe ser un número positivo.", null);
                     return;
                 }
-                
-                // Pedir proveedor
+
                 TextInputDialog provDialogo = new TextInputDialog();
                 provDialogo.setTitle("Proveedor");
                 provDialogo.setHeaderText("Ingrese el proveedor para esta compra:");
@@ -410,10 +550,19 @@ public class Main extends Application {
     /**
      * Maneja la lógica para el botón "Vender Stock".
      * Pide una cantidad y actualiza el stock del producto.
+     * 
+     * @param producto El producto al que se le venderá stock
+     * @param tabla La tabla de productos que se actualizará
      */
-    private void logicaVenderProducto(Secciones seccion, Producto producto, TableView<Producto> tabla) {
-        if (producto == null || seccion == null) {
-            mostrarAlerta(Alert.AlertType.WARNING, "Acción no válida", "Debe seleccionar una sección y un producto.", null);
+    private void logicaVenderProducto(Producto producto, TableView<Producto> tabla) {
+        if (producto == null) {
+            mostrarAlerta(Alert.AlertType.WARNING, "Acción no válida", "Debe seleccionar un producto.", null);
+            return;
+        }
+        
+        Secciones seccion = almacen.encontrarSeccionDeProducto(producto.getNombre());
+        if (seccion == null) {
+            mostrarAlerta(Alert.AlertType.ERROR, "Error Crítico", "No se pudo encontrar la sección para este producto.", null);
             return;
         }
 
@@ -436,7 +585,7 @@ public class Main extends Application {
 
             } catch (NumberFormatException nfe) {
                 mostrarAlerta(Alert.AlertType.ERROR, "Error de formato", "Debe ingresar un número entero válido.", null);
-            } catch (Exception e) { // Captura StockInsuficiente, ProductoVencido, etc.
+            } catch (Exception e) {
                 mostrarAlerta(Alert.AlertType.ERROR, "Error en la venta", "No se pudo realizar la venta.", e.getMessage());
             }
         });
@@ -446,42 +595,102 @@ public class Main extends Application {
      * Maneja la lógica para el botón "Generar Reporte".
      * Pide un filtro, genera la lista y pide al usuario dónde guardar el archivo Excel.
      */
-    private void logicaGenerarReporte() {
-        TextInputDialog dialogo = new TextInputDialog("0");
-        dialogo.setTitle("Generar Reporte de Ventas");
-        dialogo.setHeaderText("Filtrar productos por ventas");
-        dialogo.setContentText("Mostrar productos con ventas mayores o iguales a:");
+    private void logicaOpcionesReporte() {
+        Dialog<Object[]> dialog = new Dialog<>();
+        dialog.setTitle("Opciones de Reporte");
+        dialog.setHeaderText("Seleccione el tipo de filtro para generar el reporte");
 
-        dialogo.showAndWait().ifPresent(ventasMinimasStr -> {
-            try {
-                int ventasMinimas = Integer.parseInt(ventasMinimasStr);
-                List<Producto> productosFiltrados = almacen.filtrarProductosPorVentas(ventasMinimas);
+        ButtonType generarButtonType = new ButtonType("Generar", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(generarButtonType, ButtonType.CANCEL);
 
-                if (productosFiltrados.isEmpty()) {
-                    mostrarAlerta(Alert.AlertType.INFORMATION, "Sin resultados", "No se encontraron productos que cumplan con ese criterio.", null);
-                    return;
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 150, 10, 10));
+
+        ToggleGroup group = new ToggleGroup();
+        RadioButton rbVentas = new RadioButton("Filtrar por ventas mínimas:");
+        rbVentas.setToggleGroup(group);
+        rbVentas.setSelected(true);
+
+        RadioButton rbProveedor = new RadioButton("Filtrar por proveedor:");
+        rbProveedor.setToggleGroup(group);
+
+        TextField txtVentas = new TextField("0");
+        TextField txtProveedor = new TextField();
+        txtProveedor.setPromptText("Nombre del proveedor");
+        txtProveedor.setDisable(true);
+
+        group.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
+            txtVentas.setDisable(newVal == rbProveedor);
+            txtProveedor.setDisable(newVal == rbVentas);
+        });
+
+        grid.add(rbVentas, 0, 0);
+        grid.add(txtVentas, 1, 0);
+        grid.add(rbProveedor, 0, 1);
+        grid.add(txtProveedor, 1, 1);
+
+        dialog.getDialogPane().setContent(grid);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == generarButtonType) {
+                try {
+                    if (rbVentas.isSelected()) {
+                        int ventasMinimas = Integer.parseInt(txtVentas.getText());
+                        return new Object[]{"VENTAS", ventasMinimas};
+                    } else {
+                        String proveedor = txtProveedor.getText();
+                        if (proveedor.trim().isEmpty()) {
+                            throw new IllegalArgumentException("El nombre del proveedor no puede estar vacío.");
+                        }
+                        return new Object[]{"PROVEEDOR", proveedor};
+                    }
+                } catch (Exception e) {
+                    mostrarAlerta(Alert.AlertType.ERROR, "Dato Inválido", "Por favor, revise los datos ingresados.", e.getMessage());
+                    return null;
                 }
+            }
+            return null;
+        });
 
-                FileChooser fileChooser = new FileChooser();
-                fileChooser.setTitle("Guardar Reporte");
-                fileChooser.setInitialFileName("Reporte_Ventas_" + LocalDate.now() + ".xlsx");
-                fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Archivos de Excel", "*.xlsx"));
-                
-                File archivo = fileChooser.showSaveDialog(primaryStage);
-                if (archivo != null) {
-                    ExportadorExcel.generarReporte(almacen, productosFiltrados, archivo.getAbsolutePath());
-                    mostrarAlerta(Alert.AlertType.INFORMATION, "Éxito", "Reporte generado y guardado en:\n" + archivo.getAbsolutePath(), null);
+        Optional<Object[]> resultado = dialog.showAndWait();
+        resultado.ifPresent(filtro -> {
+            String tipo = (String) filtro[0];
+            List<Producto> productosFiltrados;
+
+            if (tipo.equals("VENTAS")) {
+                productosFiltrados = almacen.filtrarProductosPorVentas((int) filtro[1]);
+            } else {
+                productosFiltrados = almacen.filtrarProductosPorProveedor((String) filtro[1]);
+            }
+            
+            if (productosFiltrados.isEmpty()) {
+                mostrarAlerta(Alert.AlertType.INFORMATION, "Sin Resultados", "No se encontraron productos que cumplan con ese criterio.", null);
+                return;
+            }
+            
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Guardar Reporte");
+            fileChooser.setInitialFileName("Reporte_" + tipo + "_" + LocalDate.now() + ".xlsx");
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Archivos de Excel", "*.xlsx"));
+
+            File archivo = fileChooser.showSaveDialog(primaryStage);
+            if (archivo != null) {
+                try {
+                    if (tipo.equals("VENTAS")) {
+                        ExportadorExcel.generarReporteVentas(almacen, productosFiltrados, archivo.getAbsolutePath());
+                    } else {
+                        ExportadorExcel.generarReporteProveedor(productosFiltrados, archivo.getAbsolutePath());
+                    }
+                    mostrarAlerta(Alert.AlertType.INFORMATION, "Éxito", "Reporte generado y guardado.", null);
+                } catch (IOException e) {
+                    mostrarAlerta(Alert.AlertType.ERROR, "Error al Guardar", "No se pudo guardar el archivo Excel.", e.getMessage());
                 }
-
-            } catch (NumberFormatException nfe) {
-                mostrarAlerta(Alert.AlertType.ERROR, "Error de formato", "Debe ingresar un número entero válido.", null);
-            } catch (IOException ioe) {
-                mostrarAlerta(Alert.AlertType.ERROR, "Error al guardar", "No se pudo guardar el archivo de Excel.", ioe.getMessage());
             }
         });
     }
 }
-
 
 /**
  * Clase auxiliar para crear un diálogo de formulario personalizado para agregar nuevos productos.
@@ -489,22 +698,27 @@ public class Main extends Application {
  */
 class DialogoProducto {
 
+	/** Constructor por defecto para el dialogo de creacion de productos. */
+    public DialogoProducto() {}
+	
+    /**
+     * Muestra el diálogo personalizado para agregar un nuevo producto.
+     * 
+     * @return Optional con el producto creado si se confirma, o empty si se cancela
+     */
     public Optional<Producto> mostrarDialogo() {
         Dialog<Producto> dialog = new Dialog<>();
         dialog.setTitle("Agregar Nuevo Producto");
         dialog.setHeaderText("Complete los datos del nuevo producto");
 
-        // --- Configuración de Botones ---
         ButtonType crearButtonType = new ButtonType("Crear", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(crearButtonType, ButtonType.CANCEL);
 
-        // --- Creación del Layout (GridPane) ---
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(20, 150, 10, 10));
 
-        // --- Creación de Controles del Formulario ---
         TextField nombreField = new TextField();
         nombreField.setPromptText("Nombre del producto");
         TextField proveedorField = new TextField();
@@ -515,22 +729,18 @@ class DialogoProducto {
         ComboBox<String> tipoCombo = new ComboBox<>(FXCollections.observableArrayList("Normal", "Perecible", "Premium"));
         tipoCombo.setValue("Normal");
 
-        // Campos dinámicos
         DatePicker fechaVencimientoPicker = new DatePicker();
         TextField stockMaxField = new TextField();
         
         Label fechaLabel = new Label("Fecha Vencimiento:");
         Label stockMaxLabel = new Label("Stock Máximo:");
         
-        // --- Añadir controles al GridPane ---
         grid.add(new Label("Nombre:"), 0, 0); grid.add(nombreField, 1, 0);
         grid.add(new Label("Proveedor:"), 0, 1); grid.add(proveedorField, 1, 1);
         grid.add(new Label("Compra Inicial:"), 0, 2); grid.add(compraField, 1, 2);
         grid.add(new Label("Tipo:"), 0, 3); grid.add(tipoCombo, 1, 3);
         
-        // --- Lógica para mostrar/ocultar campos dinámicos ---
         tipoCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
-            // Limpiar campos dinámicos del grid
             grid.getChildren().removeAll(fechaLabel, fechaVencimientoPicker, stockMaxLabel, stockMaxField);
             
             if (newVal.equals("Perecible")) {
@@ -542,11 +752,9 @@ class DialogoProducto {
             }
         });
 
-        // --- Habilitar/Deshabilitar botón "Crear" basado en la validez de los datos ---
         Node crearButton = dialog.getDialogPane().lookupButton(crearButtonType);
         crearButton.setDisable(true);
         
-        // Listener para validar campos comunes
         Runnable validador = () -> {
             boolean invalido = nombreField.getText().trim().isEmpty() || 
                                proveedorField.getText().trim().isEmpty() ||
@@ -557,10 +765,8 @@ class DialogoProducto {
         proveedorField.textProperty().addListener((obs, ov, nv) -> validador.run());
         compraField.textProperty().addListener((obs, ov, nv) -> validador.run());
 
-
         dialog.getDialogPane().setContent(grid);
 
-        // --- Convertir el resultado del diálogo en un objeto Producto ---
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == crearButtonType) {
                 try {
@@ -576,12 +782,10 @@ class DialogoProducto {
                         case "Premium":
                             int stockMax = Integer.parseInt(stockMaxField.getText());
                             return new ProductoPremium(nombre, proveedor, compra, stockMax);
-                        default: // Normal
+                        default:
                             return new Producto(nombre, proveedor, compra);
                     }
                 } catch (Exception e) {
-                    // Si hay un error de formato o validación, se evita que el diálogo se cierre
-                    // mostrando una alerta y devolviendo null.
                     Alert errorAlert = new Alert(Alert.AlertType.ERROR);
                     errorAlert.setTitle("Error de Validación");
                     errorAlert.setHeaderText("Datos inválidos.");

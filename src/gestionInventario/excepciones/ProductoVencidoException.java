@@ -7,9 +7,14 @@ package gestionInventario.excepciones;
  * @author Renato Espina
  * @version 1.1 (Convertida a RuntimeException)
  */
-public class ProductoVencidoException extends RuntimeException { // El cambio clave está aquí
+public class ProductoVencidoException extends RuntimeException { 
+	// Identificador único para el control de versiones durante la serialización.
     private static final long serialVersionUID = 1L;
     
+    /**
+     * Construye una nueva excepción con el mensaje de detalle especificado.
+     * @param mensaje El mensaje de detalle.
+     */
     public ProductoVencidoException(String mensaje) {
         super(mensaje);
     }

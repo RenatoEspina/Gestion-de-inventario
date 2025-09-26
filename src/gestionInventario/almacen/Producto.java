@@ -15,20 +15,29 @@ import javafx.collections.ObservableList;
  * </p>
  * * @author Renato Espina
  * @version 2.0 (Adaptación a JavaFX)
- * @see ProductoPerecible
- * @see ProductoPremium
+ * @see gestionInventario.almacen.subProductos.ProductoPerecible
+ * @see gestionInventario.almacen.subProductos.ProductoPremium
  */
 public class Producto {
-    // Propiedades de JavaFX en lugar de tipos primitivos
-    private final SimpleStringProperty nombre;
-    private final ObservableList<String> proveedores; // ObservableList para vincular a vistas
-    private final SimpleIntegerProperty stock;
-    private final SimpleIntegerProperty compras;
-    private final SimpleIntegerProperty ventas;
+	
+	/** Propiedad observable para el nombre del producto, permite el enlace con la UI. */
+	private final SimpleStringProperty nombre;
+
+	/** Lista observable de proveedores del producto, para vincular a vistas como tablas o listas. */
+	private final ObservableList<String> proveedores;
+
+	/** Propiedad observable para el stock actual del producto. */
+	private final SimpleIntegerProperty stock;
+
+	/** Propiedad observable para el total de unidades compradas del producto. */
+	private final SimpleIntegerProperty compras;
+
+	/** Propiedad observable para el total de unidades vendidas del producto. */
+	private final SimpleIntegerProperty ventas;
     
     /**
      * Constructor para crear un nuevo producto.
-     * * @param nombre     El nombre del producto
+     * @param nombre     El nombre del producto
      * @param proveedor  El proveedor inicial del producto
      * @param compra     La cantidad inicial comprada del producto
      * @throws IllegalArgumentException si el nombre es null o vacío, o si la compra es negativa
@@ -114,7 +123,7 @@ public class Producto {
     /**
      * Agrega un nuevo proveedor a la lista de proveedores del producto.
      * Si el proveedor ya existe, no se realiza ninguna acción.
-     * * @param proveedor El nombre del proveedor a agregar
+     * @param proveedor El nombre del proveedor a agregar
      */
     public void agregarProveedor(String proveedor) {
         if (!this.proveedores.contains(proveedor)) {
@@ -124,7 +133,7 @@ public class Producto {
 
     /**
      * Ajusta los valores de compras y ventas totales, y recalcula el stock.
-     * * @param comprasTotales El nuevo valor total de compras
+     * @param comprasTotales El nuevo valor total de compras
      * @param ventasTotales  El nuevo valor total de ventas
      */
     public void ajustarComprasVentas(int comprasTotales, int ventasTotales) {
@@ -135,7 +144,7 @@ public class Producto {
     
     /**
      * Registra una compra del producto, actualizando stock y lista de proveedores.
-     * * @param proveedor El proveedor de la compra
+     * @param proveedor El proveedor de la compra
      * @param cantidad    La cantidad de unidades compradas
      */
     public void compra(String proveedor, int cantidad) {
@@ -147,7 +156,7 @@ public class Producto {
     
     /**
      * Registra una venta del producto, actualizando stock y ventas totales.
-     * * @param cantidad La cantidad de unidades vendidas
+     * @param cantidad La cantidad de unidades vendidas
      * @throws IllegalArgumentException si la cantidad de venta es mayor al stock disponible
      */
     public void venta(int cantidad) {

@@ -14,7 +14,8 @@ import gestionInventario.excepciones.StockMaximoExcedidoException; // Nueva exce
  * @see Producto
  */
 public class ProductoPremium extends Producto {
-    private int stockMaximo;
+	/** El límite máximo de unidades que se pueden almacenar para este producto premium. */
+	private int stockMaximo;
 
     /**
      * Constructor para crear un nuevo producto premium.

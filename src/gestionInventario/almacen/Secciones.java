@@ -20,8 +20,12 @@ import javafx.collections.ObservableList;
  * @see StockInsuficienteException
  */
 public class Secciones {
-    private String nombre;
-    private HashMap<String, Producto> productos;
+	/** Nombre de la sección en el inventario. */
+	private String nombre;
+
+	/** Mapa de productos asociados a esta sección. */
+	private HashMap<String, Producto> productos;
+
 
     /**
      * Constructor para crear una nueva sección vacía.
@@ -59,6 +63,14 @@ public class Secciones {
      */
     public ObservableList<Producto> getProductosAsObservableList() {
         return FXCollections.observableArrayList(productos.values());
+    }
+    
+    /**
+     * Establece un nuevo nombre para la sección.
+     * @param nombre El nuevo nombre de la sección.
+     */
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
     }
     
     /**
