@@ -100,10 +100,130 @@ public class Main extends Application {
         return root;
     }
     
-    private void salirYGuardar() { /* ... Sin cambios ... */ }
-    private void mostrarAlerta(Alert.AlertType tipo, String titulo, String encabezado, String contenido) { /* ... Sin cambios ... */ }
-    private void abrirVentanaSecciones() { /* ... Sin cambios ... */ }
+    /**
+     * Guarda el inventario actual en los archivos CSV y cierra la aplicación.
+     * Muestra una alerta si ocurre un error durante el guardado.
+     */
+    private void salirYGuardar() {
+        try {
+            // Llama al gestor de persistencia para guardar el estado actual del inventario
+            gestor.guardarInventario(almacen);
+            mostrarAlerta(Alert.AlertType.INFORMATION, "Guardado", "Inventario guardado con éxito.", "¡Hasta luego!");
+        } catch (IOException e) {
+            // Si algo sale mal, muestra una alerta de error
+            mostrarAlerta(Alert.AlertType.ERROR, "Error al Guardar", "No se pudo guardar el inventario.", e.getMessage());
+        }
+        // Cierra la ventana principal y finaliza la aplicación
+        primaryStage.close();
+    }
+    
+    /**
+     * Muestra un diálogo de alerta genérico.
+     * @param tipo El tipo de alerta (ERROR, INFORMATION, WARNING, etc.)
+     * @param titulo El título de la ventana de alerta.
+     * @param encabezado El texto principal de la alerta.
+     * @param contenido Un texto descriptivo opcional.
+     */
+    private void mostrarAlerta(Alert.AlertType tipo, String titulo, String encabezado, String contenido) {
+        Alert alerta = new Alert(tipo);
+        alerta.setTitle(titulo);
+        alerta.setHeaderText(encabezado);
+        if (contenido != null) {
+            alerta.setContentText(contenido);
+        }
+        alerta.showAndWait();
+    }
+    
+    /**
+     * Abre una nueva ventana modal para gestionar las secciones del inventario.
+     * Permite agregar y eliminar secciones.
+     */
+    private void abrirVentanaSecciones() {
+        // Crea la nueva ventana (Stage)
+        Stage ventana = new Stage();
+        ventana.initModality(Modality.APPLICATION_MODAL); // Bloquea la ventana principal
+        ventana.setTitle("Gestionar Secciones");
+        ventana.setMinWidth(400);
 
+        // Layout principal
+        BorderPane layout = new BorderPane();
+        layout.setPadding(new Insets(20));
+
+        // Título
+        Label titulo = new Label("Secciones del Almacén");
+        titulo.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+        layout.setTop(titulo);
+        BorderPane.setAlignment(titulo, Pos.CENTER);
+
+        // Lista para mostrar las secciones
+        ListView<Secciones> listaSecciones = new ListView<>();
+        // Carga las secciones desde el inventario usando la lista observable
+        listaSecciones.setItems(almacen.getSeccionesAsObservableList());
+        layout.setCenter(listaSecciones);
+        BorderPane.setMargin(listaSecciones, new Insets(15, 0, 15, 0));
+
+
+        // Botones de acción
+        Button btnAgregar = new Button("Agregar Sección");
+        Button btnEliminar = new Button("Eliminar Sección");
+        btnAgregar.setMaxWidth(Double.MAX_VALUE);
+        btnEliminar.setMaxWidth(Double.MAX_VALUE);
+        
+        // Layout para los botones
+        HBox botonesLayout = new HBox(10, btnAgregar, btnEliminar);
+        botonesLayout.setAlignment(Pos.CENTER);
+        layout.setBottom(botonesLayout);
+
+        // --- Lógica de los botones ---
+
+        // Lógica para agregar una sección
+        btnAgregar.setOnAction(e -> {
+            TextInputDialog dialogo = new TextInputDialog();
+            dialogo.setTitle("Nueva Sección");
+            dialogo.setHeaderText("Ingrese el nombre de la nueva sección:");
+            dialogo.setContentText("Nombre:");
+
+            Optional<String> resultado = dialogo.showAndWait();
+            resultado.ifPresent(nombre -> {
+                if (nombre.trim().isEmpty()) {
+                    mostrarAlerta(Alert.AlertType.WARNING, "Inválido", "El nombre de la sección no puede estar vacío.", null);
+                } else if (almacen.nuevaSeccion(nombre)) {
+                    listaSecciones.setItems(almacen.getSeccionesAsObservableList()); // Refresca la lista
+                    listaSecciones.refresh();
+                    mostrarAlerta(Alert.AlertType.INFORMATION, "Éxito", "Sección '" + nombre + "' creada correctamente.", null);
+                } else {
+                    mostrarAlerta(Alert.AlertType.ERROR, "Error", "La sección '" + nombre + "' ya existe.", null);
+                }
+            });
+        });
+
+        // Lógica para eliminar una sección
+        btnEliminar.setOnAction(e -> {
+            Secciones seccionSeleccionada = listaSecciones.getSelectionModel().getSelectedItem();
+            if (seccionSeleccionada == null) {
+                mostrarAlerta(Alert.AlertType.WARNING, "Acción no válida", "Debe seleccionar una sección de la lista.", null);
+                return;
+            }
+
+            Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION, "¿Seguro que desea eliminar la sección '" + seccionSeleccionada.getNombre() + "'? Se eliminarán todos sus productos.", ButtonType.YES, ButtonType.NO);
+            confirmacion.setTitle("Confirmar Eliminación");
+            confirmacion.setHeaderText(null);
+
+            confirmacion.showAndWait().ifPresent(response -> {
+                if (response == ButtonType.YES) {
+                    almacen.eliminarSeccion(seccionSeleccionada.getNombre());
+                    listaSecciones.setItems(almacen.getSeccionesAsObservableList()); // Refresca la lista
+                    listaSecciones.refresh();
+                    mostrarAlerta(Alert.AlertType.INFORMATION, "Éxito", "Sección eliminada.", null);
+                }
+            });
+        });
+
+        // Configurar y mostrar la ventana
+        Scene escena = new Scene(layout, 450, 500);
+        ventana.setScene(escena);
+        ventana.showAndWait(); // Muestra la ventana y espera a que se cierre
+    }
 
     // --- GESTIÓN DE PRODUCTOS (MÉTODO PRINCIPAL) ---
 
