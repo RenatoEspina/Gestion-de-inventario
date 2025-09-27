@@ -100,6 +100,72 @@ public class Producto {
         return this.ventas.get();
     }
 
+    /**
+     * Establece el nombre del producto.
+     * <p>
+     * Este método actualiza la propiedad observable {@code nombre}, lo que
+     * permite notificar automáticamente a la interfaz gráfica de cambios.
+     * </p>
+     *
+     * @param nombre el nuevo nombre del producto
+     */
+    public void setNombre(String nombre) {
+        this.nombre.set(nombre);
+    }
+
+    /**
+     * Reemplaza la lista de proveedores asociados al producto.
+     * <p>
+     * Este método sobrescribe completamente el contenido de la lista observable
+     * {@code proveedores}. Los cambios son reflejados en vistas vinculadas como
+     * tablas o listas.
+     * </p>
+     *
+     * @param proveedores la nueva lista observable de proveedores
+     */
+    public void setProveedores(ObservableList<String> proveedores) {
+        this.proveedores.setAll(proveedores);
+    }
+
+    /**
+     * Establece el stock actual del producto.
+     * <p>
+     * Actualiza la propiedad observable {@code stock}, permitiendo el enlace
+     * dinámico con la interfaz de usuario.
+     * </p>
+     *
+     * @param stock la cantidad de unidades disponibles en inventario
+     */
+    public void setStock(int stock) {
+        this.stock.set(stock);
+    }
+
+    /**
+     * Establece el total de unidades compradas del producto.
+     * <p>
+     * Actualiza la propiedad observable {@code compras}, reflejando la cantidad
+     * acumulada adquirida.
+     * </p>
+     *
+     * @param compras el número total de unidades compradas
+     */
+    public void setCompras(int compras) {
+        this.compras.set(compras);
+    }
+
+    /**
+     * Establece el total de unidades vendidas del producto.
+     * <p>
+     * Actualiza la propiedad observable {@code ventas}, reflejando la cantidad
+     * acumulada vendida.
+     * </p>
+     *
+     * @param ventas el número total de unidades vendidas
+     */
+    public void setVentas(int ventas) {
+        this.ventas.set(ventas);
+    }
+    
     // --- Getters de propiedades (para JavaFX) ---
 
     public SimpleStringProperty nombreProperty() {

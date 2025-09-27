@@ -50,6 +50,27 @@ public class Inventario {
     }
     
     /**
+     * Clona las secciones de un HashMap de secciones mediante referencia
+     *
+     * @param secciones Las secciones a clonar.
+     */
+    public void setSeccionesReferencia(HashMap<String, Secciones> secciones) {
+    	this.secciones = new HashMap<>(secciones);
+    	return;
+    }
+    
+    /**
+     * Clona las secciones de un HashMap de secciones sin dependencia del HashMap clonado
+     *
+     * @param secciones Las secciones a clonar.
+     */
+    public void setSeccionesClonacion(HashMap<String, Secciones> secciones) {
+    	for (HashMap.Entry<String, Secciones> entry : secciones.entrySet()) {
+    	    this.secciones.put(entry.getKey(), new Secciones(entry.getValue()));
+    	}
+    }
+    
+    /**
      * Crea una nueva sección en el inventario.
      *
      * @param nombre El nombre de la nueva sección a crear.

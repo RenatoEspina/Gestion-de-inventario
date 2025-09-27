@@ -36,6 +36,15 @@ public class Secciones {
         this.nombre = nombre;
         this.productos = new HashMap<>();
     }
+
+    /**
+     * Constructor para crear una nueva sección en base a otra.
+     *
+     * @param otra La seccion a copiar
+     */
+    public Secciones(Secciones otra) {
+        this.nombre = otra.nombre;
+    }
     
     /**
      * Obtiene el nombre de la sección.
@@ -71,6 +80,17 @@ public class Secciones {
      */
     public void setNombre(String nombre) {
         this.nombre = nombre;
+    }
+    
+    
+    /**
+     * Clona los productos de un HashMap de productos mediante referencia
+     *
+     * @param productos Los productos a clonar.
+     */
+    public void setProductosReferencia(HashMap<String, Producto> productos) {
+    	this.productos = new HashMap<>(productos);
+    	return;
     }
     
     /**
