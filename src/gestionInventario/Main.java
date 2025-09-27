@@ -7,9 +7,7 @@ import gestionInventario.almacen.subProductos.ProductoPerecible;
 import gestionInventario.almacen.subProductos.ProductoPremium;
 import gestionInventario.excepciones.ProductoNoEncontradoException;
 import gestionInventario.excepciones.SeccionNoEncontradaException;
-import gestionInventario.utilidades.ExportadorExcel;
-import gestionInventario.utilidades.GestorPersistencia;
-import gestionInventario.utilidades.ExportadorTXT;
+import gestionInventario.utilidades.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,6 +28,10 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+import javafx.embed.swing.SwingNode;
+import javax.swing.SwingUtilities; 
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
 
 /**
  * Clase principal que inicia y controla la aplicación de gestión de inventario con interfaz gráfica JavaFX.
@@ -144,22 +146,22 @@ public class Main extends Application {
     }
     
     /**
-     * Muestra un diálogo de alerta genérico.
-     * 
-     * @param tipo El tipo de alerta (ERROR, INFORMATION, WARNING, etc.)
-     * @param titulo El título de la ventana de alerta
-     * @param encabezado El texto principal de la alerta
-     * @param contenido Un texto descriptivo opcional
-     */
-    private void mostrarAlerta(Alert.AlertType tipo, String titulo, String encabezado, String contenido) {
-        Alert alerta = new Alert(tipo);
-        alerta.setTitle(titulo);
-        alerta.setHeaderText(encabezado);
-        if (contenido != null) {
-            alerta.setContentText(contenido);
-        }
-        alerta.showAndWait();
-    }
+	 * Muestra un diálogo de alerta genérico.
+	 *
+	 * @param tipo El tipo de alerta (ERROR, INFORMATION, WARNING, etc.)
+	 * @param titulo El título de la ventana de alerta
+	 * @param encabezado El texto principal de la alerta
+	 * @param contenido Un texto descriptivo opcional
+	 */
+	private void mostrarAlerta(Alert.AlertType tipo, String titulo, String encabezado, String contenido) {
+		Alert alerta = new Alert(tipo);
+		alerta.setTitle(titulo);
+		alerta.setHeaderText(encabezado);
+		if (contenido != null) {
+			alerta.setContentText(contenido);
+		}
+		alerta.showAndWait();
+	}
     
     /**
      * Abre una nueva ventana modal para gestionar las secciones del inventario.
@@ -592,104 +594,155 @@ public class Main extends Application {
     }
 
     /**
-     * Maneja la lógica para el botón "Generar Reporte".
-     * Pide un filtro, genera la lista y pide al usuario dónde guardar el archivo Excel.
-     */
-    private void logicaOpcionesReporte() {
-        Dialog<Object[]> dialog = new Dialog<>();
-        dialog.setTitle("Opciones de Reporte");
-        dialog.setHeaderText("Seleccione el tipo de filtro para generar el reporte");
+	 * Maneja la lógica para el botón "Opciones de filtro...".
+	 * Pide un filtro, y en lugar de generar el reporte directamente,
+	 * ahora abre una ventana con un gráfico de JFreeChart.
+	 */
+	private void logicaOpcionesReporte() {
+		Dialog<Object[]> dialog = new Dialog<>();
+		dialog.setTitle("Opciones de Reporte");
+		dialog.setHeaderText("Seleccione el tipo de filtro para generar el gráfico y reporte");
 
-        ButtonType generarButtonType = new ButtonType("Generar", ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(generarButtonType, ButtonType.CANCEL);
+		ButtonType generarButtonType = new ButtonType("Generar Gráfico", ButtonBar.ButtonData.OK_DONE); // Texto del botón cambiado
+		dialog.getDialogPane().getButtonTypes().addAll(generarButtonType, ButtonType.CANCEL);
 
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(20, 150, 10, 10));
+		GridPane grid = new GridPane();
+		grid.setHgap(10);
+		grid.setVgap(10);
+		grid.setPadding(new Insets(20, 150, 10, 10));
 
-        ToggleGroup group = new ToggleGroup();
-        RadioButton rbVentas = new RadioButton("Filtrar por ventas mínimas:");
-        rbVentas.setToggleGroup(group);
-        rbVentas.setSelected(true);
+		ToggleGroup group = new ToggleGroup();
+		RadioButton rbVentas = new RadioButton("Filtrar por ventas mínimas:");
+		rbVentas.setToggleGroup(group);
+		rbVentas.setSelected(true);
 
-        RadioButton rbProveedor = new RadioButton("Filtrar por proveedor:");
-        rbProveedor.setToggleGroup(group);
+		RadioButton rbProveedor = new RadioButton("Filtrar por proveedor:");
+		rbProveedor.setToggleGroup(group);
 
-        TextField txtVentas = new TextField("0");
-        TextField txtProveedor = new TextField();
-        txtProveedor.setPromptText("Nombre del proveedor");
-        txtProveedor.setDisable(true);
+		TextField txtVentas = new TextField("0");
+		TextField txtProveedor = new TextField();
+		txtProveedor.setPromptText("Nombre del proveedor");
+		txtProveedor.setDisable(true);
 
-        group.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
-            txtVentas.setDisable(newVal == rbProveedor);
-            txtProveedor.setDisable(newVal == rbVentas);
-        });
+		group.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
+			txtVentas.setDisable(newVal == rbProveedor);
+			txtProveedor.setDisable(newVal == rbVentas);
+		});
 
-        grid.add(rbVentas, 0, 0);
-        grid.add(txtVentas, 1, 0);
-        grid.add(rbProveedor, 0, 1);
-        grid.add(txtProveedor, 1, 1);
+		grid.add(rbVentas, 0, 0);
+		grid.add(txtVentas, 1, 0);
+		grid.add(rbProveedor, 0, 1);
+		grid.add(txtProveedor, 1, 1);
 
-        dialog.getDialogPane().setContent(grid);
+		dialog.getDialogPane().setContent(grid);
 
-        dialog.setResultConverter(dialogButton -> {
-            if (dialogButton == generarButtonType) {
-                try {
-                    if (rbVentas.isSelected()) {
-                        int ventasMinimas = Integer.parseInt(txtVentas.getText());
-                        return new Object[]{"VENTAS", ventasMinimas};
-                    } else {
-                        String proveedor = txtProveedor.getText();
-                        if (proveedor.trim().isEmpty()) {
-                            throw new IllegalArgumentException("El nombre del proveedor no puede estar vacío.");
-                        }
-                        return new Object[]{"PROVEEDOR", proveedor};
-                    }
-                } catch (Exception e) {
-                    mostrarAlerta(Alert.AlertType.ERROR, "Dato Inválido", "Por favor, revise los datos ingresados.", e.getMessage());
-                    return null;
-                }
-            }
-            return null;
-        });
+		dialog.setResultConverter(dialogButton -> {
+			if (dialogButton == generarButtonType) {
+				try {
+					if (rbVentas.isSelected()) {
+						int ventasMinimas = Integer.parseInt(txtVentas.getText());
+						return new Object[]{"VENTAS", ventasMinimas};
+					} else {
+						String proveedor = txtProveedor.getText();
+						if (proveedor.trim().isEmpty()) {
+							throw new IllegalArgumentException("El nombre del proveedor no puede estar vacío.");
+						}
+						return new Object[]{"PROVEEDOR", proveedor};
+					}
+				} catch (Exception e) {
+					mostrarAlerta(Alert.AlertType.ERROR, "Dato Inválido", "Por favor, revise los datos ingresados.", e.getMessage());
+					return null;
+				}
+			}
+			return null;
+		});
 
-        Optional<Object[]> resultado = dialog.showAndWait();
-        resultado.ifPresent(filtro -> {
-            String tipo = (String) filtro[0];
-            List<Producto> productosFiltrados;
+		Optional<Object[]> resultado = dialog.showAndWait();
+		resultado.ifPresent(filtro -> {
+			String tipo = (String) filtro[0];
+			List<Producto> productosFiltrados;
 
-            if (tipo.equals("VENTAS")) {
-                productosFiltrados = almacen.filtrarProductosPorVentas((int) filtro[1]);
-            } else {
-                productosFiltrados = almacen.filtrarProductosPorProveedor((String) filtro[1]);
-            }
-            
-            if (productosFiltrados.isEmpty()) {
-                mostrarAlerta(Alert.AlertType.INFORMATION, "Sin Resultados", "No se encontraron productos que cumplan con ese criterio.", null);
-                return;
-            }
-            
-            FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("Guardar Reporte");
-            fileChooser.setInitialFileName("Reporte_" + tipo + "_" + LocalDate.now() + ".xlsx");
-            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Archivos de Excel", "*.xlsx"));
+			String tituloGrafico; // NUEVO: para dar un título dinámico al gráfico
 
-            File archivo = fileChooser.showSaveDialog(primaryStage);
-            if (archivo != null) {
-                try {
-                    if (tipo.equals("VENTAS")) {
-                        ExportadorExcel.generarReporteVentas(almacen, productosFiltrados, archivo.getAbsolutePath());
-                    } else {
-                        ExportadorExcel.generarReporteProveedor(productosFiltrados, archivo.getAbsolutePath());
-                    }
-                    mostrarAlerta(Alert.AlertType.INFORMATION, "Éxito", "Reporte generado y guardado.", null);
-                } catch (IOException e) {
-                    mostrarAlerta(Alert.AlertType.ERROR, "Error al Guardar", "No se pudo guardar el archivo Excel.", e.getMessage());
-                }
-            }
-        });
-    }
+			if (tipo.equals("VENTAS")) {
+				int valor = (int) filtro[1];
+				productosFiltrados = almacen.filtrarProductosPorVentas(valor);
+				tituloGrafico = "Productos con un mínimo de " + valor + " ventas";
+			} else {
+				String valor = (String) filtro[1];
+				productosFiltrados = almacen.filtrarProductosPorProveedor(valor);
+				tituloGrafico = "Productos del proveedor: " + valor;
+			}
+
+			if (productosFiltrados.isEmpty()) {
+				mostrarAlerta(Alert.AlertType.INFORMATION, "Sin Resultados", "No se encontraron productos que cumplan con ese criterio.", null);
+				return;
+			}
+			
+			// NUEVO: En lugar de generar el Excel, llamamos al nuevo método que muestra el gráfico.
+			mostrarVentanaGraficoYReporte(productosFiltrados, tipo, tituloGrafico);
+		});
+	}
+
+	/**
+	 * NUEVO: Este método crea y muestra una nueva ventana con el gráfico de JFreeChart
+	 * y ofrece la opción de generar el reporte de Excel.
+	 *
+	 * @param productosFiltrados La lista de productos a visualizar y reportar.
+	 * @param tipo               El tipo de filtro que se aplicó ("VENTAS" o "PROVEEDOR").
+	 * @param tituloGrafico      El título para la ventana y el gráfico.
+	 */
+	private void mostrarVentanaGraficoYReporte(List<Producto> productosFiltrados, String tipo, String tituloGrafico) {
+		Stage ventanaGrafico = new Stage();
+		ventanaGrafico.initModality(Modality.APPLICATION_MODAL);
+		ventanaGrafico.setTitle("Visualización de Reporte: " + tituloGrafico);
+
+		// 1. Crear el gráfico usando nuestra clase de utilidad
+		JFreeChart chart = GraficoUtilidades.crearGraficoDeBarrasVentas(productosFiltrados, tituloGrafico);
+		ChartPanel chartPanel = new ChartPanel(chart);
+
+		// 2. Integrar el panel de Swing (JFreeChart) en un nodo de JavaFX
+		SwingNode swingNode = new SwingNode();
+		SwingUtilities.invokeLater(() -> swingNode.setContent(chartPanel));
+
+		// 3. Crear el botón para generar el reporte
+		Button btnGenerarExcel = new Button("Generar Reporte Excel");
+		btnGenerarExcel.setOnAction(e -> {
+			// Esta es la lógica que antes estaba en logicaOpcionesReporte
+			FileChooser fileChooser = new FileChooser();
+			fileChooser.setTitle("Guardar Reporte");
+			fileChooser.setInitialFileName("Reporte_" + tipo + "_" + LocalDate.now() + ".xlsx");
+			fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Archivos de Excel", "*.xlsx"));
+
+			File archivo = fileChooser.showSaveDialog(primaryStage);
+			if (archivo != null) {
+				try {
+					if (tipo.equals("VENTAS")) {
+						ExportadorExcel.generarReporteVentas(almacen, productosFiltrados, archivo.getAbsolutePath());
+					} else {
+						ExportadorExcel.generarReporteProveedor(productosFiltrados, archivo.getAbsolutePath());
+					}
+					mostrarAlerta(Alert.AlertType.INFORMATION, "Éxito", "Reporte generado y guardado.", null);
+					ventanaGrafico.close(); // Cerramos la ventana del gráfico después de generar el reporte
+				} catch (IOException ex) {
+					mostrarAlerta(Alert.AlertType.ERROR, "Error al Guardar", "No se pudo guardar el archivo Excel.", ex.getMessage());
+				}
+			}
+		});
+
+		// 4. Montar la escena
+		HBox layoutBotones = new HBox(btnGenerarExcel);
+		layoutBotones.setAlignment(Pos.CENTER);
+		layoutBotones.setPadding(new Insets(10));
+
+		BorderPane layoutPrincipal = new BorderPane();
+		layoutPrincipal.setCenter(swingNode); // El gráfico en el centro
+		layoutPrincipal.setBottom(layoutBotones); // El botón abajo
+
+		Scene scene = new Scene(layoutPrincipal, 800, 600);
+		ventanaGrafico.setScene(scene);
+		ventanaGrafico.showAndWait();
+	}
 }
 
 /**

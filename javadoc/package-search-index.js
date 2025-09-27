@@ -1,1 +1,0 @@
-packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"gestionInventario"},{"l":"gestionInventario.almacen"},{"l":"gestionInventario.almacen.subProductos"},{"l":"gestionInventario.excepciones"},{"l":"gestionInventario.utilidades"}];updateSearchResults();
